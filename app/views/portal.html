@@ -1,0 +1,70 @@
+<span ng-controller="portalController">
+   <span style="position:fixed;top:20px;right:30px;z-index:1111;background-color:#ffffff;padding:5px;border-radius:5px" class="pull-right">
+      <a href="" ng-click="showAddPortletWindow()" class="faa-tada animated-hover">
+         <li class="fa fa-plus"></li>
+      </a>
+      <a href="" ng-click="savePortalState()" class="faa-tada animated-hover">
+         <li class="fa fa-floppy-o"></li>
+      </a>
+   </span>
+   <!-- START widgets box-->
+   <div class="row">
+      <div ng-repeat="(k,v) in portal" class="portlet {{portletCol(v.Col)}} panelNo{{k}}">
+         <!-- START panel-->
+         <div class="panel {{v.Style}}">
+            <div class="pull-right toolbar">
+               <div style="cursor:pointer" dropdown="dropdown" ng-if="v.Resizable.overall" class="btn-group">
+                  <span type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="dropdown-toggle">
+                     <li class="fa fa-square-o faa-tada animated-hover"></li>
+                  </span>
+                  <ul role="menu" class="dropdown-menu pull-right">
+                     <li ng-if="v.Resizable.row &amp;&amp; v.Row&gt;v.Resizable.minRow"><a href="" ng-click="resizeDecRow(k)"><i class="fa fa-toggle-up faa-tada animated-hover"></i>&nbsp; Decrease Rows</a>
+                     </li>
+                     <li ng-if="v.Resizable.row &amp;&amp; v.Row&lt;v.Resizable.maxRow"><a href="" ng-click="resizeIncRow(k)"><i class="fa fa-toggle-down faa-tada animated-hover"></i>&nbsp; Increase Rows</a>
+                     </li>
+                     <li ng-if="v.Resizable.col &amp;&amp; v.Col&gt;v.Resizable.minCol"><a href="" ng-click="resizeDecCol(k)"><i class="fa fa-toggle-left faa-tada animated-hover"></i>&nbsp; Decrease Cols</a>
+                     </li>
+                     <li ng-if="v.Resizable.col &amp;&amp; v.Col&lt;v.Resizable.maxCol"><a href="" ng-click="resizeIncCol(k)"><i class="fa fa-toggle-right faa-tada animated-hover"></i>&nbsp; Increase Cols</a>
+                     </li>
+                  </ul>
+               </div>
+               <span ng-click="fullScreen($event)">
+                  <li class="fa fa-desktop"></li>
+               </span>
+               <span ng-click="editPortlet(k)">
+                  <li class="fa faa-tada animated-hover {{ v.Edit ? 'fa-check' : 'fa-pencil' }}"></li>
+               </span>
+               <span message="Are you sure ?" are-you-sure="removePortlet(k)">
+                  <li class="fa fa-close"></li>
+               </span>
+            </div>
+            <div ng-if="v.Title" class="panel-heading">{{v.Title}}</div>
+            <div collapse="panelNo{{k}}" class="panel-wrapper">
+               <div style="overflow-y:auto;margin:0px;padding:0px;border:0px;{{portletRow(v.Row)}}" ng-if="!v.Edit" dynamic="{{portletDirective(v.Portlet,k)}}" class="panel-body"></div>
+               <div ng-if="v.Edit" class="panel-body">
+                  <div class="form-group">
+                     <div class="input-group">
+                        <span class="input-group-addon">Title</span>
+                        <input type="text" placeholder="Title" ng-model="v.Title" class="form-control" />
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="input-group">
+                        <span class="input-group-addon">Footer</span>
+                        <input type="text" placeholder="Footer" ng-model="v.Footer" class="form-control" />
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="input-group">
+                        <span class="input-group-addon">Style</span>
+                        <select ng-model="v.Style" ng-options="st.Style as st.Title for st in styles" class="form-control"></select>
+                     </div>
+                  </div>
+               </div>
+               <div ng-if="v.Footer" class="panel-footer">{{v.Footer}}</div>
+            </div>
+         </div>
+         <!-- END panel-->
+      </div>
+   </div>
+</span>

@@ -1,0 +1,581 @@
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"Users/:id/Mojios","defaultCriteria":"","criteria":""}]
+-->
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"api","defaultCriteria":"","criteria":""}]
+-->
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"Users/:id/Mojios","defaultCriteria":"","criteria":""}]
+-->
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"Users/:id/Mojios","defaultCriteria":"","criteria":""}]
+-->
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"api","defaultCriteria":"","criteria":""}]
+-->
+<!--Created by pooyaparidel on 15-03-11.
+ [{"MojioModel":"api","defaultCriteria":"","criteria":""}]
+-->
+<h3>Admin Search</h3>
+<tabset>
+   <tab>
+      <tab-heading><i class="fa fa-user">&nbsp;User</i>
+      </tab-heading>
+      <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Users&quot;,&quot;defaultCriteria&quot;:&quot;:key&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+         <span st-pipe="callServer" st-table="displayed">
+            <div ng-show="selectedRow==null" class="pull-right">
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-primary dropdown-toggle">Fields
+                     <span class="caret"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu">
+                     <li ng-repeat="x in s.f"><a ng-click="ShowHide(x.name)"><i ng-show="!x.show" class="fa fa-square-o"></i><i ng-show="x.show" class="fa fa-check-square-o"></i>{{ x.name }}</a>
+                     </li>
+                  </ul>
+               </div>
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-warning dropdown-toggle">Page Size
+                     <span class="fa fa-list"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu">
+                     <li><a ng-click="changeItemsPerPage(10)"><i class="fa fa-check-square-o"></i>10</a>
+                     </li>
+                     <li><a ng-click="changeItemsPerPage(20)"><i class="fa fa-check-square-o"></i>20</a>
+                     </li>
+                  </ul>
+               </div>
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn dropdown-toggle">Export
+                     <span class="fa fa-download"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu pull-right">
+                     <li><a ng-click="exportData(EXPORT_CURRENT_PAGE,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Current Page</a>
+                     </li>
+                     <li><a ng-click="exportData(EXPORT_VISITED_PAGES,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Visited Pages</a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+            <div class="panel-body">
+               <table class="table table-hover">
+                  <thead ng-show="selectedRow==null">
+                     <tr>
+                        <th colspan="4"><i class="fa fa-user fa-2x"></i>
+                        </th>
+                        <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">USERNAME</th>
+                        <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">EMAIL</th>
+                        <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">FULL NAME</th>
+                     </tr>
+                  </thead>
+                  <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                     <tr ng-repeat-start="row in displayed">
+                        <td></td>
+                        <td>
+                           <a href="" ng-click="detailRow(row)">
+                              <li class="fa fa-code"></li>
+                           </a>
+                        </td>
+                        <td>
+                           <a href="" ng-click="showSubGrid(row,'Mojios')">
+                              <li class="fa fa-hdd-o"></li>
+                           </a>
+                        </td>
+                        <td>
+                           <a href="" ng-click="showSubGrid(row,'Vehicles')">
+                              <li class="fa fa-car"></li>
+                           </a>
+                        </td>
+                        <td ng-show="s.f[0].show">{{row.UserName}}</td>
+                        <td ng-show="s.f[1].show">{{row.Email}}</td>
+                        <td ng-show="s.f[2].show">{{row.FirstName}} {{row.LastName}}</td>
+                     </tr>
+                     <tr ng-repeat-end="ng-repeat-end">
+                        <td colspan="40" ng-if="subGrid==row &amp;&amp; subGridType=='Mojios'">
+                           <!--+gridmojios('false','lite','pagination','false','[{"MojioModel":"Users/:id/Mojios","defaultCriteria":"","criteria":""}]')-->
+                           <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Mojios&quot;,&quot;defaultCriteria&quot;:&quot;OwnerId=:id&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+                              <span st-pipe="callServer" st-table="displayed">
+                                 <div class="panel-body">
+                                    <table class="table table-hover">
+                                       <thead ng-show="selectedRow==null">
+                                          <tr>
+                                             <th colspan="2"><i class="fa fa-hdd-o fa-2x"></i>
+                                             </th>
+                                             <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">IMEI</th>
+                                             <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">NAME</th>
+                                             <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">STATE</th>
+                                             <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">CONTACT</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                                          <tr ng-repeat="row in displayed">
+                                             <td></td>
+                                             <td>
+                                                <a href="" ng-click="detailRow(row)">
+                                                   <li class="fa fa-code"></li>
+                                                </a>
+                                             </td>
+                                             <td ng-show="s.f[0].show"><a href="#" ng-click="showDetailView('app.devicedetail','deviceRow',row)">{{row.Imei}}</a>
+                                             </td>
+                                             <td ng-show="s.f[1].show">{{row.Name}}</td>
+                                             <td ng-show="s.f[2].show">{{row.DevicePrivate.DeviceUpdate.UpdateState}}</td>
+                                             <td ng-show="s.f[3].show">{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                                          </tr>
+                                       </tbody>
+                                       <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                                          <tr>
+                                             <td>
+                                                <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                                                   <li class="fa fa-arrow-left"></li>Close</button>
+                                                <br/>
+                                                <br/>
+                                                <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                       <tfoot>
+                                          <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                                             <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                                             </td>
+                                             <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                                          </tr>
+                                       </tfoot>
+                                    </table>
+                                 </div>
+                              </span>
+                           </span>
+                        </td>
+                        <td colspan="40" ng-if="subGrid==row &amp;&amp; subGridType=='Vehicles'">
+                           <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Users/:id/Vehicles&quot;,&quot;defaultCriteria&quot;:&quot;&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+                              <span st-pipe="callServer" st-table="displayed">
+                                 <div class="panel-body">
+                                    <table class="table table-hover">
+                                       <thead ng-show="selectedRow==null">
+                                          <tr>
+                                             <th colspan="3"><i class="fa fa-car fa-2x"></i>
+                                             </th>
+                                             <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">NAME</th>
+                                             <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">LAST LOCATION</th>
+                                             <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">LAST CONTACT</th>
+                                             <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">FUEL LEVEL</th>
+                                             <th ng-show="s.f[4].show" data-show="true" st-sort="CONTACT" class="fieldHeader">VIN</th>
+                                             <th ng-show="s.f[5].show" data-show="true" st-sort="CONTACT" class="fieldHeader">IGNITION</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                                          <tr ng-repeat-start="row in displayed">
+                                             <td>
+                                                <a href="" ng-click="detailRow(row,'broadcast')">
+                                                   <li class="fa fa-tag"></li>
+                                                </a>
+                                             </td>
+                                             <td>
+                                                <a href="" ng-click="detailRow(row)">
+                                                   <li class="fa fa-code"></li>
+                                                </a>
+                                             </td>
+                                             <td>
+                                                <a href="" ng-click="showSubGrid(row,'Trips')">
+                                                   <li class="fa fa-openid"></li>
+                                                </a>
+                                             </td>
+                                             <td ng-show="s.f[0].show">{{row.Name}}</td>
+                                             <td ng-show="s.f[1].show">
+                                                <mojio-location geoloc="row.LastLocation"></mojio-location>
+                                             </td>
+                                             <td ng-show="s.f[2].show">{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                                             <td ng-show="s.f[3].show">
+                                                <progressbar max="100" value="row.FuelLevel" ng-style="{height:7}" class="progress-striped active"></progressbar>
+                                             </td>
+                                             <td ng-show="s.f[4].show">{{row.VIN}}</td>
+                                             <td ng-show="s.f[5].show">{{row.IgnitionOn}}</td>
+                                          </tr>
+                                          <tr ng-repeat-end="ng-repeat-end">
+                                             <td colspan="40" ng-if="subGrid==row &amp;&amp; subGridType=='Trips'">
+                                                <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Vehicles/:id/Trips&quot;,&quot;defaultCriteria&quot;:&quot;&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+                                                   <span st-pipe="callServer" st-table="displayed">
+                                                      <div class="panel-body">
+                                                         <table class="table table-hover">
+                                                            <thead ng-show="selectedRow==null">
+                                                               <tr>
+                                                                  <th colspan="2"><i class="fa fa-openid fa-2x"></i>
+                                                                  </th>
+                                                                  <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">S ADDRESS</th>
+                                                                  <th ng-show="s.f[1].show" data-show="true" st-sort="STATE" class="fieldHeader">S TIME</th>
+                                                                  <th ng-show="s.f[2].show" data-show="true" st-sort="CONTACT" class="fieldHeader">E ADDRESS</th>
+                                                                  <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">E TIME</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                                                               <tr ng-repeat="row in displayed">
+                                                                  <td>
+                                                                     <a href="" ng-click="detailRow(row,'broadcast')">
+                                                                        <li class="fa fa-tag"></li>
+                                                                     </a>
+                                                                  </td>
+                                                                  <td>
+                                                                     <a href="" ng-click="detailRow(row)">
+                                                                        <li class="fa fa-code"></li>
+                                                                     </a>
+                                                                  </td>
+                                                                  <td ng-show="s.f[0].show">
+                                                                     <mojio-location geoloc="row.StartLocation" address="row.StartAddress"></mojio-location>
+                                                                  </td>
+                                                                  <td ng-show="s.f[1].show">{{row.StartTime | date:'yy-MM-dd HH:mm'}}</td>
+                                                                  <td ng-show="s.f[2].show">
+                                                                     <mojio-location geoloc="row.EndLocation" address="row.EndAddress"></mojio-location>
+                                                                  </td>
+                                                                  <td ng-show="s.f[3].show">{{row.EndTime | date:'yy-MM-dd HH:mm'}}</td>
+                                                               </tr>
+                                                            </tbody>
+                                                            <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                                                               <tr>
+                                                                  <td>
+                                                                     <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                                                                        <li class="fa fa-arrow-left"></li>Close</button>
+                                                                     <br/>
+                                                                     <br/>
+                                                                     <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                            <tfoot>
+                                                               <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                                                                  <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                                                                  </td>
+                                                                  <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                                                               </tr>
+                                                            </tfoot>
+                                                         </table>
+                                                      </div>
+                                                   </span>
+                                                </span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                       <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                                          <tr>
+                                             <td>
+                                                <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                                                   <li class="fa fa-arrow-left"></li>Close</button>
+                                                <br/>
+                                                <br/>
+                                                <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                       <tfoot>
+                                          <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                                             <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                                             </td>
+                                             <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                                          </tr>
+                                       </tfoot>
+                                    </table>
+                                 </div>
+                              </span>
+                           </span>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                     <tr>
+                        <td>
+                           <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                              <li class="fa fa-arrow-left"></li>Close</button>
+                           <br/>
+                           <br/>
+                           <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tfoot>
+                     <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                        <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                        </td>
+                        <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                     </tr>
+                  </tfoot>
+               </table>
+            </div>
+         </span>
+      </span>
+   </tab>
+   <tab>
+      <tab-heading><i class="fa fa-hdd-o">&nbsp;Mojio</i>
+      </tab-heading>
+      <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Mojios&quot;,&quot;defaultCriteria&quot;:&quot;:key&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+         <accordion>
+            <accordion-group heading="Search By IMEI" is-open="false">
+               <div class="form-group col-lg-3">
+                  <label>IMEI</label>
+                  <input name="imei" class="form-control" />
+                  <br/>
+                  <button ng-click="newSearch(0)" class="btn btn-default">
+                     <li class="fa fa-search"></li>Search</button>
+               </div>
+            </accordion-group>
+            <accordion-group heading="Search By Device Peroperties" is-open="false">
+               <h4>Device Properties
+                  <div class="form-group col-lg-3"></div>
+                  <label>Firmware</label>
+                  <input name="firmware" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Configuration</label>
+                  <input name="Configuration" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Serial Number</label>
+                  <input name="serialNumber" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Part Number</label>
+                  <input name="partNumber" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Device Type</label>
+                  <select name="deviceType" class="form-control">
+                     <option value=""></option>
+                     <option value="Xirgo">Xirgo</option>
+                     <option value="MDI">MDI</option>
+                  </select>
+                  <div class="clearfix"></div>
+                  <h4>Device Update</h4>
+                  <div class="form-group col-lg-3"></div>
+                  <label>Device Type
+                     <select multiple="multiple" name="deviceType" class="form-control"></select>
+                     <option value="Aborted">Aborted</option>
+                     <option value="Failed">Failed</option>
+                     <option value="Deployed">Deployed</option>
+                     <option value="Launched">Launched</option>
+                     <option value="Complete">Complete</option>
+                  </label>
+                  <div class="form-group col-lg-3"></div>
+                  <label>Configuration Stamp</label>
+                  <input name="configurationStamp" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Firmware Stamp</label>
+                  <input name="firmwareStamp" class="form-control" />
+                  <div class="form-group col-lg-3"></div>
+                  <label>Update Type
+                     <select name="updateType" class="form-control"></select>
+                     <option value=""></option>
+                     <option value="Configuration">Configuration</option>
+                     <option value="firmware">Firmware</option>
+                  </label>
+                  <div class="form-group col-lg-12"></div>
+                  <button ng-click="newSearch(1)" class="btn btn-default">
+                     <li class="fa fa-search"></li>Search</button>
+               </h4>
+            </accordion-group>
+         </accordion>
+         <span st-pipe="callServer" st-table="displayed">
+            <div ng-show="selectedRow==null" class="pull-right">
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-primary dropdown-toggle">Fields
+                     <span class="caret"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu">
+                     <li ng-repeat="x in s.f"><a ng-click="ShowHide(x.name)"><i ng-show="!x.show" class="fa fa-square-o"></i><i ng-show="x.show" class="fa fa-check-square-o"></i>{{ x.name }}</a>
+                     </li>
+                  </ul>
+               </div>
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-warning dropdown-toggle">Page Size
+                     <span class="fa fa-list"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu">
+                     <li><a ng-click="changeItemsPerPage(10)"><i class="fa fa-check-square-o"></i>10</a>
+                     </li>
+                     <li><a ng-click="changeItemsPerPage(20)"><i class="fa fa-check-square-o"></i>20</a>
+                     </li>
+                  </ul>
+               </div>
+               <div dropdown="dropdown" class="btn-group">
+                  <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn dropdown-toggle">Export
+                     <span class="fa fa-download"></span>
+                  </button>
+                  <ul role="menu" class="dropdown-menu pull-right">
+                     <li><a ng-click="exportData(EXPORT_CURRENT_PAGE,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Current Page</a>
+                     </li>
+                     <li><a ng-click="exportData(EXPORT_VISITED_PAGES,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Visited Pages</a>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+            <div class="panel-body">
+               <table class="table table-hover">
+                  <thead ng-show="selectedRow==null">
+                     <tr>
+                        <th colspan="2"><i class="fa fa-hdd-o fa-2x"></i>
+                        </th>
+                        <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">IMEI</th>
+                        <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">NAME</th>
+                        <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">STATE</th>
+                        <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">CONTACT</th>
+                     </tr>
+                  </thead>
+                  <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                     <tr ng-repeat="row in displayed">
+                        <td></td>
+                        <td>
+                           <a href="" ng-click="detailRow(row)">
+                              <li class="fa fa-code"></li>
+                           </a>
+                        </td>
+                        <td ng-show="s.f[0].show"><a href="#" ng-click="showDetailView('app.devicedetail','deviceRow',row)">{{row.Imei}}</a>
+                        </td>
+                        <td ng-show="s.f[1].show">{{row.Name}}</td>
+                        <td ng-show="s.f[2].show">{{row.DevicePrivate.DeviceUpdate.UpdateState}}</td>
+                        <td ng-show="s.f[3].show">{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                     </tr>
+                  </tbody>
+                  <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                     <tr>
+                        <td>
+                           <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                              <li class="fa fa-arrow-left"></li>Close</button>
+                           <br/>
+                           <br/>
+                           <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tfoot>
+                     <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                        <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                        </td>
+                        <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                     </tr>
+                  </tfoot>
+               </table>
+            </div>
+         </span>
+      </span>
+   </tab>
+   <tab>
+      <tab-heading><i class="fa fa-car">&nbsp;Vehicle</i>
+      </tab-heading>
+      <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Vehicles&quot;,&quot;defaultCriteria&quot;:&quot;:key&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+         <span st-pipe="callServer" st-table="displayed">
+            <div class="panel-body">
+               <table class="table table-hover">
+                  <thead ng-show="selectedRow==null">
+                     <tr>
+                        <th colspan="3"><i class="fa fa-car fa-2x"></i>
+                        </th>
+                        <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">NAME</th>
+                        <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">LAST LOCATION</th>
+                        <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">LAST CONTACT</th>
+                        <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">FUEL LEVEL</th>
+                        <th ng-show="s.f[4].show" data-show="true" st-sort="CONTACT" class="fieldHeader">VIN</th>
+                        <th ng-show="s.f[5].show" data-show="true" st-sort="CONTACT" class="fieldHeader">IGNITION</th>
+                     </tr>
+                  </thead>
+                  <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                     <tr ng-repeat-start="row in displayed">
+                        <td></td>
+                        <td>
+                           <a href="" ng-click="detailRow(row)">
+                              <li class="fa fa-code"></li>
+                           </a>
+                        </td>
+                        <td>
+                           <a href="" ng-click="showSubGrid(row,'Trips')">
+                              <li class="fa fa-openid"></li>
+                           </a>
+                        </td>
+                        <td ng-show="s.f[0].show">{{row.Name}}</td>
+                        <td ng-show="s.f[1].show">
+                           <mojio-location geoloc="row.LastLocation"></mojio-location>
+                        </td>
+                        <td ng-show="s.f[2].show">{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                        <td ng-show="s.f[3].show">
+                           <progressbar max="100" value="row.FuelLevel" ng-style="{height:7}" class="progress-striped active"></progressbar>
+                        </td>
+                        <td ng-show="s.f[4].show">{{row.VIN}}</td>
+                        <td ng-show="s.f[5].show">{{row.IgnitionOn}}</td>
+                     </tr>
+                     <tr ng-repeat-end="ng-repeat-end">
+                        <td colspan="40" ng-if="subGrid==row &amp;&amp; subGridType=='Trips'">
+                           <span ng-controller="mojioGridController" data-alias="UserMojioGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;Vehicles/:id/Trips&quot;,&quot;defaultCriteria&quot;:&quot;&quot;,&quot;criteria&quot;:&quot;&quot;}]">
+                              <span st-pipe="callServer" st-table="displayed">
+                                 <div class="panel-body">
+                                    <table class="table table-hover">
+                                       <thead ng-show="selectedRow==null">
+                                          <tr>
+                                             <th colspan="2"><i class="fa fa-openid fa-2x"></i>
+                                             </th>
+                                             <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">S ADDRESS</th>
+                                             <th ng-show="s.f[1].show" data-show="true" st-sort="STATE" class="fieldHeader">S TIME</th>
+                                             <th ng-show="s.f[2].show" data-show="true" st-sort="CONTACT" class="fieldHeader">E ADDRESS</th>
+                                             <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">E TIME</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
+                                          <tr ng-repeat="row in displayed">
+                                             <td>
+                                                <a href="" ng-click="detailRow(row,'broadcast')">
+                                                   <li class="fa fa-tag"></li>
+                                                </a>
+                                             </td>
+                                             <td>
+                                                <a href="" ng-click="detailRow(row)">
+                                                   <li class="fa fa-code"></li>
+                                                </a>
+                                             </td>
+                                             <td ng-show="s.f[0].show">
+                                                <mojio-location geoloc="row.StartLocation" address="row.StartAddress"></mojio-location>
+                                             </td>
+                                             <td ng-show="s.f[1].show">{{row.StartTime | date:'yy-MM-dd HH:mm'}}</td>
+                                             <td ng-show="s.f[2].show">
+                                                <mojio-location geoloc="row.EndLocation" address="row.EndAddress"></mojio-location>
+                                             </td>
+                                             <td ng-show="s.f[3].show">{{row.EndTime | date:'yy-MM-dd HH:mm'}}</td>
+                                          </tr>
+                                       </tbody>
+                                       <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                                          <tr>
+                                             <td>
+                                                <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                                                   <li class="fa fa-arrow-left"></li>Close</button>
+                                                <br/>
+                                                <br/>
+                                                <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                       <tfoot>
+                                          <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                                             <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                                             </td>
+                                             <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                                          </tr>
+                                       </tfoot>
+                                    </table>
+                                 </div>
+                              </span>
+                           </span>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
+                     <tr>
+                        <td>
+                           <button type="button" href="" ng-click="selectRow(null)" class="btn">
+                              <li class="fa fa-arrow-left"></li>Close</button>
+                           <br/>
+                           <br/>
+                           <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tfoot>
+                     <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+                        <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+                        </td>
+                        <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+                     </tr>
+                  </tfoot>
+               </table>
+            </div>
+         </span>
+      </span>
+   </tab>
+</tabset>
