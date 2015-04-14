@@ -1,12 +1,31 @@
 <span ng-controller="portalController">
-   <span style="position:fixed;top:20px;right:30px;z-index:1111;background-color:#ffffff;padding:5px;border-radius:5px" class="pull-right">
-      <a href="" ng-click="showAddPortletWindow()" class="faa-tada animated-hover">
-         <li class="fa fa-plus"></li>
-      </a>
-      <a href="" ng-click="savePortalState()" class="faa-tada animated-hover">
-         <li class="fa fa-floppy-o"></li>
-      </a>
-   </span>
+   <span style="position:fixed;top:15px;right:70px;margin:5px;z-index:1001">
+      <span style="background-color:#ffffff;border-radius:5px;padding:2px">
+         <span ng-if="selData[0].Type==''">None</span>
+         <span ng-if="selData[0].Type!=''">
+            <a href="" ng-click="deselect()">
+               <li class="fa fa-times"></li>
+            </a>{{selData[0] | mojioTitle}}</span>
+         <div style="cursor:pointer" dropdown="dropdown" ng-if="selData.length&gt;1" class="btn-group">
+            <span type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="dropdown-toggle">
+               <li class="fa fa-caret-square-o-down faa-tada animated-hover"></li>
+            </span>
+            <ul role="menu" class="dropdown-menu pull-right">
+               <div ng-repeat="(p,d) in selData" ng-if="p!=0">
+                  <a href="" ng-click="broadcast(d)">
+                     <li class="fa fa-check-square-o"></li>&nbsp; {{d | mojioTitle}}</a>
+               </div>
+            </ul>
+         </div>
+      </span>&nbsp;&nbsp;&nbsp;
+      <span style="background-color:#ffffff;border-radius:5px;padding:2px">
+         <a href="" ng-click="showAddPortletWindow()" class="faa-tada animated-hover">
+            <li class="fa fa-plus"></li>
+         </a>
+         <a href="" ng-click="savePortalState()" class="faa-tada animated-hover">
+            <li class="fa fa-floppy-o"></li>
+         </a>
+      </span>&nbsp;&nbsp;&nbsp;</span>
    <!-- START widgets box-->
    <div class="row">
       <div ng-repeat="(k,v) in portal" class="portlet {{portletCol(v.Col)}} panelNo{{k}}">

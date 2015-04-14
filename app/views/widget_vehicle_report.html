@@ -1,0 +1,48 @@
+<div class="row">
+   <div class="panel-body">
+      <div>
+         <div class="col-md-2">Period: {{range}} days</div>
+         <div class="col-md-2">
+            <input type="range" min="1" max="30" ng-model="range" ng-change="prepareData()" ng-model-options="{debounce:200}" />
+         </div>
+      </div>
+      <div>
+         <table class="table table-hover">
+            <thead ng-show="selectedRow==null">
+               <tr>
+                  <th class="fieldHeader">NAME</th>
+                  <th class="fieldHeader">LAST LOCATION</th>
+                  <th class="fieldHeader">LAST CONTACT</th>
+                  <th class="fieldHeader">FUEL LEVEL</th>
+                  <th class="fieldHeader">VIN</th>
+                  <th class="fieldHeader">IGNITION</th>
+                  <th class="fieldHeader"># of Trips</th>
+                  <th class="fieldHeader">Mileage</th>
+                  <th class="fieldHeader">Duration</th>
+                  <th class="fieldHeader">Fuel Consumption</th>
+                  <th class="fieldHeader">Fuel Efficency</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr ng-repeat="row in vehicles">
+                  <td>{{row.Name}}</td>
+                  <td>
+                     <mojio-location geoloc="row.LastLocation"></mojio-location>
+                  </td>
+                  <td>{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                  <td>
+                     <progressbar max="100" value="row.FuelLevel" ng-style="{height:7}" class="progress-striped active"></progressbar>
+                  </td>
+                  <td>{{row.VIN}}</td>
+                  <td>{{row.IgnitionOn}}</td>
+                  <td>{{row.TripsNo}}</td>
+                  <td>{{row.Mileage | number:'2'}}</td>
+                  <td>{{toHHMMSS(row.Duration)}}</td>
+                  <td>{{row.FuelConsumption | number:'2'}}</td>
+                  <td>{{row.FuelEfficency | number:'2'}}</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>

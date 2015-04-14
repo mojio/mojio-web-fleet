@@ -14,11 +14,12 @@ if (typeof $ === 'undefined') {
   throw new Error('This application\'s JavaScript requires jQuery');
 }
 
-App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage', 'ngCookies', 'pascalprecht.translate', 'ui.bootstrap', 'ui.router', 'oc.lazyLoad', 'cfp.loadingBar', 'ngSanitize', 'ngResource', 'ui.utils', 'toaster', 'jsonFormatter']).run([
+App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage', 'ngCookies', 'pascalprecht.translate', 'ui.bootstrap', 'ui.router', 'cfp.loadingBar', 'ngSanitize', 'ngResource', 'ui.utils', 'toaster', 'jsonFormatter']).run([
   'mojioGlobal', '$rootScope', '$state', '$stateParams', '$window', '$templateCache', function(mojioGlobal, $rootScope, $state, $stateParams, $window, $templateCache) {
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
     $rootScope.$storage = $window.localStorage;
+    mojioGlobal.checkAccess();
 
     /*$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
         if (typeof(toState) !== 'undefined'){
@@ -49,7 +50,6 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
       job: 'Admin',
       picture: 'app/img/user/02.jpg'
     };
-    mojioGlobal.checkAccess();
   }
 ]);
 
@@ -68,12 +68,11 @@ App.config([
       url: '/app',
       abstract: true,
       templateUrl: helper.basepath('app.html'),
-      controller: 'AppController',
-      resolve: helper.resolveFor('modernizr', 'icons')
+      controller: 'AppController'
     }).state('app.dashboard', {
       url: '/dashboard',
       title: 'Dashboard',
-      templateUrl: helper.basepath('dashboard.html')
+      templateUrl: helper.basepath('admin_dashboard.html')
     }).state('app.devicelist', {
       url: '/devicelist/:search',
       title: 'Device List',
@@ -126,15 +125,6 @@ App.config([
       url: '/portal/:pid/:full?',
       title: 'Portal',
       templateUrl: helper.basepath('portal.html')
-    });
-  }
-]).config([
-  '$ocLazyLoadProvider', 'APP_REQUIRES', function($ocLazyLoadProvider, APP_REQUIRES) {
-    'use strict';
-    $ocLazyLoadProvider.config({
-      debug: false,
-      events: true,
-      modules: APP_REQUIRES.modules
     });
   }
 ]).config([
@@ -196,10 +186,6 @@ App.constant('APP_COLORS', {
   'tablet': 768,
   'mobile': 480
 }).constant('APP_REQUIRES', {
-  scripts: {
-    'modernizr': ['vendor/modernizr/modernizr.js'],
-    'icons': []
-  },
   modules: []
 });
 
@@ -1298,8 +1284,9 @@ App.factory('colors', [
 (function(common) {
   var mojioGlobal;
   mojioGlobal = function($http, localStorage) {
-    var GoToOAuth, TOKENKEY, apiUrl, changeProducationMode, checkAccess, createMojioForSignal, data, logout;
+    var GoToOAuth, TOKENKEY, USERKEY, apiUrl, changeProducationMode, checkAccess, createMojioForSignal, data, logout;
     TOKENKEY = 'ACCESS_TOKEN_KEY';
+    USERKEY = 'USER_DATA_KEY';
     data = {
       mojio_client: null,
       mojio_observer: null,
@@ -1368,42 +1355,41 @@ App.factory('colors', [
     checkAccess = function() {
       var access_token;
       var access_token, config, e, param;
-      if (data.access_token.length == 0) {
-        param = window.location.toString().split('#')[1];
-        if (typeof param != 'undefined' && param.indexOf('/access_token=') == 0) {
-          try {
-            access_token = window.location.toString().split('#')[1].split('&')[0].split('=')[1];
-            if (access_token) {
-              data.access_token = access_token;
-            }
-          } catch (_error) {
-            e = _error;
-          }
-        } else {
-          access_token = localStorage.get(TOKENKEY);
-          if (access_token != null && access_token.length != 0) {
+      param = window.location.toString().split('#')[1];
+      if (typeof param !== 'undefined' && param.indexOf('/access_token=') === 0) {
+        try {
+          access_token = window.location.toString().split('#')[1].split('&')[0].split('=')[1];
+          if (access_token) {
             data.access_token = access_token;
           }
+        } catch (_error) {
+          e = _error;
+        }
+      } else {
+        access_token = localStorage.get(TOKENKEY);
+        data.user_data = localStorage.get(USERKEY);
+        if (access_token !== null && access_token.length !== 0) {
+          data.access_token = access_token;
         }
       }
-      if (data.access_token.length == 0) {
+      if (data.access_token.length === 0) {
         GoToOAuth();
       } else {
-        createMojioForSignal();
         config = {
           headers: {
-            'Content-Type': ' application/json',
+            'Content-Type': 'application/json',
             'MojioAPIToken': data.access_token
           }
         };
-        $http.get(apiUrl() + 'Login/' + data.access_token, config).success(function(response) {
-          data.user_data.id = response.UserId;
-          $http.get(apiUrl() + 'Users/' + data.user_data.id, config).success(function(response) {
-            data.user_data.title = response.FirstName + ' ' + response.LastName;
-          });
+        $http.get(apiUrl() + 'Users/Me', config).success(function(response) {
+          data.user_data = {
+            id: response._id,
+            title: response.FirstName + ' ' + response.LastName
+          };
           localStorage.add(TOKENKEY, data.access_token);
+          localStorage.add(USERKEY, data.user_data);
         }).error(function(response) {
-          GoToOAuth();
+          return GoToOAuth();
         });
       }
     };
@@ -1584,7 +1570,7 @@ App.provider('RouteHelpers', [
       _args = arguments;
       return {
         deps: [
-          '$ocLazyLoad', '$q', function($ocLL, $q) {
+          '$q', function($q) {
             var andThen, getRequired, i, len, promise;
             promise = $q.when(1);
             andThen = function(_arg) {
@@ -1597,7 +1583,6 @@ App.provider('RouteHelpers', [
                   if (!whatToLoad) {
                     return $.error('Route resolve: Bad resource name [' + _arg + ']');
                   }
-                  return $ocLL.load(whatToLoad);
                 });
               }
             };
@@ -1790,30 +1775,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 }]);
 
 (function(module) {
-  var configDetailController;
-  configDetailController = function($rootScope, $stateParams) {
-    this.configRow = $rootScope.configRow;
-    this.showArray = function(arr) {
-      var eg;
-      eg = arr.join('<br/>');
-      return arr.join('\n\r');
-    };
-    this.changeMode = function() {
-      mojioGlobal.changeProducationMode();
-    };
-    this.UserData = function() {
-      return mojioGlobal.data.user_data;
-    };
-    this.logout = function() {
-      mojioGlobal.logout();
-    };
-  };
-  module.controller('configDetailController', configDetailController);
-})(angular.module('angle'));
-
-(function(module) {
-  var dashboardController;
-  dashboardController = function($rootScope, $stateParams, $scope, mojioRemote) {
+  var adminDashboardController;
+  adminDashboardController = function($rootScope, $stateParams, $scope, mojioRemote) {
     var today;
     $scope.mojiosTotal = "";
     mojioRemote.GET('mojios', 0, 0, "", null, function(result) {
@@ -1853,7 +1816,29 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       return $scope.carsConnected = "?";
     });
   };
-  module.controller('dashboardController', dashboardController);
+  module.controller('adminDashboardController', adminDashboardController);
+})(angular.module('angle'));
+
+(function(module) {
+  var configDetailController;
+  configDetailController = function($rootScope, $stateParams) {
+    this.configRow = $rootScope.configRow;
+    this.showArray = function(arr) {
+      var eg;
+      eg = arr.join('<br/>');
+      return arr.join('\n\r');
+    };
+    this.changeMode = function() {
+      mojioGlobal.changeProducationMode();
+    };
+    this.UserData = function() {
+      return mojioGlobal.data.user_data;
+    };
+    this.logout = function() {
+      mojioGlobal.logout();
+    };
+  };
+  module.controller('configDetailController', configDetailController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -2378,6 +2363,51 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
+  var mymojioDashboardController;
+  mymojioDashboardController = function($rootScope, $stateParams, $scope, mojioRemote) {
+    var today;
+    $scope.mojiosTotal = "";
+    mojioRemote.GET('mojios', 0, 0, "", null, function(result) {
+      return $scope.mojiosTotal = result.TotalRows;
+    }, function(result) {
+      return $scope.mojiosTotal = "?";
+    });
+    $scope.carsTotal = "";
+    mojioRemote.GET('vehicles', 0, 0, "", null, function(result) {
+      return $scope.carsTotal = result.TotalRows;
+    }, function(result) {
+      return $scope.carsTotal = "?";
+    });
+    $scope.usersTotal = "";
+    mojioRemote.GET('users', 0, 0, "", null, function(result) {
+      return $scope.usersTotal = result.TotalRows;
+    }, function(result) {
+      return $scope.usersTotal = "?";
+    });
+    $scope.tripsTotal = "";
+    mojioRemote.GET('trips', 0, 0, "", null, function(result) {
+      return $scope.tripsTotal = result.TotalRows;
+    }, function(result) {
+      return $scope.tripsTotal = "?";
+    });
+    $scope.carsDriving = "";
+    mojioRemote.GET('vehicles', 0, 0, "IgnitionOn=true", null, function(result) {
+      return $scope.carsDriving = result.TotalRows;
+    }, function(result) {
+      return $scope.carsDriving = "?";
+    });
+    today = new Date();
+    $scope.carsConnected = "";
+    return mojioRemote.GET('vehicles', 0, 0, "LastContactTime=0000.00.00-" + today.toString("yyyy.mm.dd"), null, function(result) {
+      return $scope.carsConnected = result.TotalRows;
+    }, function(result) {
+      return $scope.carsConnected = "?";
+    });
+  };
+  module.controller('mymojioDashboardController', mymojioDashboardController);
+})(angular.module('angle'));
+
+(function(module) {
   var observeController;
   observeController = function($rootScope, $stateParams, mojioGlobal, $scope) {
     var EventModel, data, mojio;
@@ -2413,7 +2443,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 
 (function(module) {
   var portalController;
-  portalController = function($modal, $templateCache, $sce, $compile, $rootScope, $stateParams, $scope, mojioRemote, localStorage) {
+  portalController = function($modal, $templateCache, $sce, $compile, $rootScope, $stateParams, $scope, mojioRemote, localStorage, toaster, mojioGlobal) {
+    var tohash;
     $scope.showAddPortlet = false;
     if ($stateParams['full'].length !== 0) {
       $('body > :not(.content-wrapper)').hide();
@@ -2421,6 +2452,11 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       $rootScope.app.useFullLayout = true;
       $('body').addClass('layout-fs');
     }
+    $scope.selData = [
+      {
+        Type: ''
+      }
+    ];
     $scope.portal = [];
     $scope.styles = [
       {
@@ -2457,6 +2493,25 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         Portlet: 'widget-vehicle-list',
         Title: 'Vehicles List',
         Desc: 'View All Vehicles ',
+        Icon: 'fa-car',
+        Col: 6,
+        Row: 12,
+        Footer: '',
+        Style: 'panel-primary',
+        Resizable: {
+          overall: true,
+          col: true,
+          row: true,
+          minRow: 3,
+          maxRow: 10,
+          minCol: 3,
+          maxCol: 12
+        },
+        Edit: false
+      }, {
+        Portlet: 'widget-vehicle-report',
+        Title: 'Vehicles Report',
+        Desc: 'Your Vehicles Report',
         Icon: 'fa-car',
         Col: 6,
         Row: 12,
@@ -2626,12 +2681,34 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         Edit: false
       }
     ];
-    $scope.portal = localStorage.get(window.location.href);
-    if (typeof $scope.portal === "undefined" || $scope.portal === null) {
-      $scope.portal = [];
-    }
+    tohash = function() {
+      var chr, hash, i, len;
+      hash = 0;
+      i = void 0;
+      chr = void 0;
+      len = void 0;
+      if (this.length === 0) {
+        return hash;
+      }
+      i = 0;
+      len = this.length;
+      while (i < len) {
+        chr = this.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0;
+        i++;
+      }
+      console.log(hash);
+      return hash;
+    };
+    $scope.portal = [];
+    mojioRemote.GET("Users/" + mojioGlobal.data.user_data.id + "/Store/" + tohash(window.location.href), null, null, null, null, function(result) {
+      return $scope.portal = JSON.parse(result);
+    }, function(result) {
+      return $scope.portal = [];
+    });
     $scope.showAddPortletWindow = function() {
-      $templateCache.put('portalAddPortletTemplate.html', '<div class="modal-header"> <h3 class="modal-title">Select Portlet</h3> </div> <div class="modal-body"> <div class="row"> <div ng-repeat="portlet in portlets" class="col-sm-3"> <div class="panel panel-default"> <div class="panel-heading"> <li class="fa {{portlet.Icon}} fa-4x"></li> <br/> <a href="" ng-click="addPortlet(portlet)">{{portlet.Title}}</a> </div> <div class="panel-body" style="height:100px;"> {{portlet.Desc}} </div> </div> </div> </div> </div>');
+      $templateCache.put('portalAddPortletTemplate.html', '<div class="modal-header"> <h3 class="modal-title">Select Portlet</h3> </div> <div class="modal-body"> <div class="row"> <div ng-repeat="portlet in portlets" class="col-sm-3"> <div class="panel panel-default"> <div class="panel-heading"> <li class="fa {{portlet.Icon}} fa-4x"></li><br/> <a href="" ng-click="addPortlet(portlet)">{{portlet.Title}}</a> </div> <div class="panel-body" style="height:100px;">{{portlet.Desc}}</div> </div> </div> </div> </div>');
       $modal.open({
         size: 'lg',
         templateUrl: 'portalAddPortletTemplate.html',
@@ -2641,6 +2718,10 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     $scope.addPortlet = function(portlet) {
       $scope.portal.push(angular.copy(portlet));
+      toaster.success({
+        title: "Add Widget",
+        body: "Widget Added Successfully"
+      });
     };
     $scope.removePortlet = function(v) {
       $scope.portal.splice(v, 1);
@@ -2672,19 +2753,79 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       return el;
     };
     $scope.savePortalState = function() {
-      localStorage.add(window.location.href, $scope.portal);
-      console.log("saved");
-      return console.log(localStorage.get(window.href));
+      return mojioRemote.POST("Users/" + mojioGlobal.data.user_data.id + "/Store/" + tohash(window.location.href), '"' + JSON.stringify($scope.portal).replace(/"/g, '\\\"') + '"', function(result) {}, toaster.success({
+        title: "Settings",
+        body: "Settings Saved Successfully"
+      }), function(result) {
+        return console.log("save error");
+      });
     };
-    return $scope.fullScreen = function(event) {
-      console.log(event.currentTarget.parentNode.parentNode);
+    $scope.fullScreen = function(event) {
       if (screenfull.enabled) {
-        return screenfull.request(event.currentTarget.parentNode.parentNode);
+        return screenfull.toggle(event.currentTarget.parentNode.parentNode);
       }
+    };
+    $rootScope.$on('MojioObjectSelected', function(event, data) {
+      var i, j, len1, ref, v;
+      if ($scope.selData[0].Type === "") {
+        $scope.selData.splice(0, 1);
+      }
+      if (data.Type !== "") {
+        ref = $scope.selData;
+        for (i = j = 0, len1 = ref.length; j < len1; i = ++j) {
+          v = ref[i];
+          if (data.Type === v.Type && data._id === v._id) {
+            $scope.selData.splice(i, 1);
+            break;
+          }
+        }
+      }
+      return $scope.selData.splice(0, 0, data);
+    });
+    $scope.broadcast = function(data) {
+      $rootScope.$broadcast('MojioObjectSelected', data);
+    };
+    return $scope.deselect = function() {
+      $rootScope.$broadcast('MojioObjectSelected', {
+        Type: ''
+      });
     };
   };
   module.controller('portalController', portalController);
 })(angular.module('angle'));
+
+angular.module('angle').filter('mojioTitle', ["dateFilter", function(dateFilter) {
+  return function(data) {
+    var ret;
+    switch (data.Type) {
+      case "":
+        ret = "None";
+        break;
+      case "User":
+        ret = "User: " + data.UserName;
+        break;
+      case "Vehicle":
+        ret = "Vehicle: ";
+        switch (data.Name) {
+          case null:
+            ret += "No Name Vehicle";
+            break;
+          default:
+            ret += data.Name;
+        }
+        break;
+      case "Trip":
+        ret = "Trip: start at " + dateFilter(data.StartTime, 'yy-MM-dd HH:mm');
+        break;
+      case "Event":
+        ret = "Event: " + data.EventType + " at " + dateFilter(data.Time, 'yy-MM-dd HH:mm');
+        break;
+      default:
+        ret = data.Type + "";
+    }
+    return ret;
+  };
+}]);
 
 angular.module('angle').filter('timeago', function() {
   return function(idate) {
@@ -2713,6 +2854,152 @@ angular.module('angle').filter('timeago', function() {
     return ago(new Date(idate));
   };
 });
+
+(function(module) {
+  var widgetDetailApp;
+  widgetDetailApp = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_detail_app.html',
+      controller: function($rootScope, $scope, mojioRemote) {
+        $scope.reset = function() {
+          return $scope.rel = {
+            mojios: [],
+            loadMojios: false,
+            vehicles: [],
+            loadVehicles: false,
+            trips: [],
+            moreTrips: false,
+            loadTrips: false,
+            events: [],
+            moreEvents: false,
+            loadEvents: false
+          };
+        };
+        $scope.reset();
+        $rootScope.$on('MojioObjectSelected', function(event, data) {
+          if (data.Type === "User") {
+            return $scope.reset();
+          }
+        });
+        $scope.broadcast = function(data) {
+          $rootScope.$broadcast('MojioObjectSelected', data);
+        };
+        $scope.showMyself = function() {
+          mojioRemote.GET("Users/Me", null, null, null, null, function(result) {
+            $scope.reset();
+            return $rootScope.$broadcast('MojioObjectSelected', result);
+          });
+        };
+        $scope.showMojios = function() {
+          mojioRemote.GET("Users/" + $scope.data._id + "/Mojios", 1000, 0, null, null, function(result) {
+            return $scope.rel.mojios = result.Data;
+          });
+        };
+        $scope.showApps = function() {
+          mojioRemote.GET("Apps", 1000, 0, null, null, function(result) {
+            return $scope.rel.apps = result.Data;
+          });
+        };
+        $scope.showVehicles = function() {
+          mojioRemote.GET("Users/" + $scope.data._id + "/Vehicles", 1000, 0, null, null, function(result) {
+            return $scope.rel.vehicles = result.Data;
+          });
+        };
+        $scope.showRecentTrips = function() {
+          $scope.rel.loadTrips = true;
+          $scope.rel.moreTrips = false;
+          mojioRemote.GET("Users/" + $scope.data._id + "/Trips", 10, $scope.rel.trips.length, null, "sortBy=StartTime&desc=true", function(result) {
+            $scope.rel.trips = $scope.rel.trips.concat(result.Data);
+            $scope.rel.loadTrips = false;
+            if (result.TotalRows > $scope.rel.trips.length) {
+              return $scope.rel.moreTrips = true;
+            } else {
+              return $scope.rel.moreTrips = false;
+            }
+          });
+        };
+        $scope.showRecentEvents = function() {
+          $scope.rel.loadEvents = true;
+          $scope.rel.moreEvents = false;
+          mojioRemote.GET("Users/" + $scope.data._id + "/Events", 10, $scope.rel.events.length, null, "sortBy=Time&desc=true", function(result) {
+            $scope.rel.events = $scope.rel.events.concat(result.Data);
+            $scope.rel.loadEvents = false;
+            if (result.TotalRows > $scope.rel.events.length) {
+              return $scope.rel.moreEvents = true;
+            } else {
+              return $scope.rel.moreEvents = false;
+            }
+          });
+        };
+      },
+      link: function($rootScope, $scope, element, attrs) {
+        $scope.data = attrs.data;
+      }
+    };
+  };
+  return module.directive('widgetDetailApp', [widgetDetailApp]);
+})(angular.module('angle'));
+
+(function(module) {
+  var widgetDetailEvent;
+  widgetDetailEvent = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_detail_event.html',
+      controller: function($rootScope, $scope, mojioRemote) {
+        $scope.reset = function() {
+          return $scope.rel = {
+            users: [],
+            loadUsers: false,
+            trips: [],
+            moreTrips: false,
+            loadTrips: false,
+            events: [],
+            moreEvents: false,
+            loadEvents: false
+          };
+        };
+        $scope.reset();
+        $rootScope.$on('MojioObjectSelected', function(event, data) {
+          if (data.Type === "Trip") {
+            return $scope.reset();
+          }
+        });
+        $scope.broadcast = function(data) {
+          $rootScope.$broadcast('MojioObjectSelected', data);
+        };
+        $scope.showVehicle = function() {
+          mojioRemote.GET("Vehicles/" + $scope.data.VehicleId, null, null, null, null, function(result) {
+            return $rootScope.$broadcast('MojioObjectSelected', result);
+          });
+        };
+        $scope.showDevice = function() {
+          mojioRemote.GET("Mojios/" + $scope.data.MojioId, null, null, null, null, function(result) {
+            return $rootScope.$broadcast('MojioObjectSelected', result);
+          });
+        };
+        $scope.showRecentEvents = function() {
+          $scope.rel.loadEvents = true;
+          $scope.rel.moreEvents = false;
+          mojioRemote.GET("Trips/" + $scope.data._id + "/Events", 10, $scope.rel.events.length, null, "sortBy=Time&desc=true", function(result) {
+            $scope.rel.events = $scope.rel.events.concat(result.Data);
+            $scope.rel.loadEvents = false;
+            if (result.TotalRows > $scope.rel.events.length) {
+              return $scope.rel.moreEvents = true;
+            } else {
+              return $scope.rel.moreEvents = false;
+            }
+          });
+        };
+      },
+      link: function($rootScope, $scope, element, attrs) {
+        $scope.data = attrs.data;
+      }
+    };
+  };
+  return module.directive('widgetDetailEvent', [widgetDetailEvent]);
+})(angular.module('angle'));
 
 (function(module) {
   var widgetDetailDevice;
@@ -2786,66 +3073,6 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
-  var widgetDetailEvent;
-  widgetDetailEvent = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/widget_detail_event.html',
-      controller: function($rootScope, $scope, mojioRemote) {
-        $scope.reset = function() {
-          return $scope.rel = {
-            users: [],
-            loadUsers: false,
-            trips: [],
-            moreTrips: false,
-            loadTrips: false,
-            events: [],
-            moreEvents: false,
-            loadEvents: false
-          };
-        };
-        $scope.reset();
-        $rootScope.$on('MojioObjectSelected', function(event, data) {
-          if (data.Type === "Trip") {
-            return $scope.reset();
-          }
-        });
-        $scope.broadcast = function(data) {
-          $rootScope.$broadcast('MojioObjectSelected', data);
-        };
-        $scope.showVehicle = function() {
-          mojioRemote.GET("Vehicles/" + $scope.data.VehicleId, null, null, null, null, function(result) {
-            return $rootScope.$broadcast('MojioObjectSelected', result);
-          });
-        };
-        $scope.showDevice = function() {
-          mojioRemote.GET("Mojios/" + $scope.data.MojioId, null, null, null, null, function(result) {
-            return $rootScope.$broadcast('MojioObjectSelected', result);
-          });
-        };
-        $scope.showRecentEvents = function() {
-          $scope.rel.loadEvents = true;
-          $scope.rel.moreEvents = false;
-          mojioRemote.GET("Trips/" + $scope.data._id + "/Events", 10, $scope.rel.events.length, null, "sortBy=Time&desc=true", function(result) {
-            $scope.rel.events = $scope.rel.events.concat(result.Data);
-            $scope.rel.loadEvents = false;
-            if (result.TotalRows > $scope.rel.events.length) {
-              return $scope.rel.moreEvents = true;
-            } else {
-              return $scope.rel.moreEvents = false;
-            }
-          });
-        };
-      },
-      link: function($rootScope, $scope, element, attrs) {
-        $scope.data = attrs.data;
-      }
-    };
-  };
-  return module.directive('widgetDetailEvent', [widgetDetailEvent]);
-})(angular.module('angle'));
-
-(function(module) {
   var widgetDetailInfo;
   widgetDetailInfo = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -2853,7 +3080,7 @@ angular.module('angle').filter('timeago', function() {
       templateUrl: 'app/views/widget_detail_info.html',
       controller: function($rootScope, $scope) {
         $scope.data = null;
-        $scope.deselct = function() {
+        $scope.deselect = function() {
           $rootScope.$broadcast('MojioObjectSelected', {
             Type: ''
           });
@@ -2967,6 +3194,11 @@ angular.module('angle').filter('timeago', function() {
         $scope.showMojios = function() {
           mojioRemote.GET("Users/" + $scope.data._id + "/Mojios", 1000, 0, null, null, function(result) {
             return $scope.rel.mojios = result.Data;
+          });
+        };
+        $scope.showApps = function() {
+          mojioRemote.GET("Apps", 1000, 0, null, null, function(result) {
+            return $scope.rel.apps = result.Data;
           });
         };
         $scope.showVehicles = function() {
@@ -3162,6 +3394,93 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('widgetVehicleList', [widgetVehicleList]);
+})(angular.module('angle'));
+
+(function(module) {
+  var widgetVehicleReport;
+  widgetVehicleReport = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_vehicle_report.html',
+      controller: function($rootScope, $scope, mojioGlobal, mojioRemote) {
+        $scope.range = 20;
+        $scope.toHHMMSS = function(sec) {
+          var hours, minutes, sec_num, seconds;
+          sec_num = parseInt(sec, 10);
+          hours = Math.floor(sec_num / 3600);
+          minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+          seconds = sec_num - (hours * 3600) - (minutes * 60);
+          if (hours < 10) {
+            hours = "0" + hours;
+          }
+          if (minutes < 10) {
+            minutes = "0" + minutes;
+          }
+          if (seconds < 10) {
+            seconds = "0" + seconds;
+          }
+          return hours + ':' + minutes + ':' + seconds;
+        };
+        $scope.prepareData = function() {
+          if (typeof $scope.UserID === "undefined") {
+            $scope.UserID = mojioGlobal.data.user_data.id;
+          }
+          return mojioRemote.GET("Users/" + $scope.UserID + "/Vehicles", 1000, 0, null, null, function(result) {
+            var i, len, next, nextString, past, pastString, ref, row, today, todayString;
+            $scope.vehicles = {};
+            ref = result.Data;
+            for (i = 0, len = ref.length; i < len; i++) {
+              row = ref[i];
+              $scope.vehicles[row._id] = angular.copy(row);
+              $scope.vehicles[row._id].TripsNo = 0;
+              $scope.vehicles[row._id].Mileage = 0;
+              $scope.vehicles[row._id].Duration = 0;
+              $scope.vehicles[row._id].FuelConsumption = 0;
+              $scope.vehicles[row._id].FuelEfficency = 0;
+            }
+            today = new Date();
+            past = new Date();
+            past.setDate((new Date()).getDate() - $scope.range);
+            next = new Date();
+            next.setDate((new Date()).getDate() + 1);
+            todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
+            pastString = past.getFullYear() + "." + (past.getMonth() + 1) + "." + past.getDate();
+            nextString = next.getFullYear() + "." + (next.getMonth() + 1) + "." + next.getDate();
+            return mojioRemote.GET("Users/" + $scope.UserID + "/Trips", 10000, 0, "StartTime=" + pastString + "-" + nextString, null, function(result) {
+              var j, len1, ref1, results, rrow;
+              ref1 = result.Data;
+              results = [];
+              for (j = 0, len1 = ref1.length; j < len1; j++) {
+                row = ref1[j];
+                rrow = $scope.vehicles[row.VehicleId];
+                rrow.TripsNo++;
+                rrow.Mileage += row.Distance;
+                rrow.Duration += ((new Date(row.EndTime)) - (new Date(row.StartTime))) / 1000;
+                if (row.Distance > 0.1 && row.FuelEfficiency > 1) {
+                  rrow.FuelConsumption += row.Distance / row.FuelEfficiency;
+                  results.push(rrow.FuelEfficency = rrow.Mileage / rrow.FuelConsumption);
+                } else {
+                  results.push(void 0);
+                }
+              }
+              return results;
+            });
+          });
+        };
+        $rootScope.$on('MojioObjectSelected', function(event, data) {
+          if (data.Type === "User") {
+            $scope.UserID = data._id;
+            return $scope.prepareData();
+          }
+        });
+        $scope.prepareData();
+      },
+      link: function($rootScope, $scope, element, attrs) {
+        $scope.data = attrs.data;
+      }
+    };
+  };
+  return module.directive('widgetVehicleReport', [widgetVehicleReport]);
 })(angular.module('angle'));
 
 (function(module) {
