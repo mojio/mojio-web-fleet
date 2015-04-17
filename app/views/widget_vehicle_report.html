@@ -37,7 +37,7 @@
                   <td>{{row.IgnitionOn}}</td>
                   <td>{{row.TripsNo}}</td>
                   <td>{{row.Mileage | number:'2'}}</td>
-                  <td>{{toHHMMSS(row.Duration)}}</td>
+                  <td>{{row.Duration | hhmmss}</td>
                   <td>{{row.FuelConsumption | number:'2'}}</td>
                   <td>{{row.FuelEfficency | number:'2'}}</td>
                </tr>

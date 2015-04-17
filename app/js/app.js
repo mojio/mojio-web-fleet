@@ -63,20 +63,24 @@ App.config([
   '$stateProvider', '$locationProvider', '$urlRouterProvider', 'RouteHelpersProvider', function($stateProvider, $locationProvider, $urlRouterProvider, helper) {
     'use strict';
     $locationProvider.html5Mode(false);
-    $urlRouterProvider.otherwise('/app/dashboard');
+    $urlRouterProvider.otherwise('/app/admindashboard');
     $stateProvider.state('app', {
       url: '/app',
       abstract: true,
       templateUrl: helper.basepath('app.html'),
       controller: 'AppController'
-    }).state('app.admindashboard', {
-      url: '/admindashboard',
-      title: 'Admin Dashboard',
-      templateUrl: helper.basepath('admin_dashboard.html')
     }).state('app.mymojiodashboard', {
       url: '/mymojiodashboard',
       title: 'MyMojio Dashboard',
       templateUrl: helper.basepath('mymojio_dashboard.html')
+    }).state('app.mymojiocars', {
+      url: '/mymojicars',
+      title: 'My Cars',
+      templateUrl: helper.basepath('mymojio_cars.html')
+    }).state('app.admindashboard', {
+      url: '/admindashboard',
+      title: 'Admin Dashboard',
+      templateUrl: helper.basepath('admin_dashboard.html')
     }).state('app.devicelist', {
       url: '/devicelist/:search',
       title: 'Device List',
@@ -621,104 +625,157 @@ App.controller('SidebarController', [
     yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
     sidebarMenuData = [
       {
-        'text': 'Dashboard',
+        'text': 'MyMojio',
         'sref': '',
-        'icon': 'fa fa-dashboard',
+        'icon': 'fa fa-file-o',
         'submenu': [
           {
-            text: 'Admin Dashboard',
+            'text': 'Dashboard',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-dashboard'
+          }, {
+            'text': 'My Cars',
+            'sref': 'app.mymojiocars',
+            'icon': 'fa fa-car'
+          }, {
+            'text': 'My Trips',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-openid'
+          }, {
+            'text': 'My Account',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-user'
+          }, {
+            'text': 'Support',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-question-circle'
+          }
+        ]
+      }, {
+        'text': 'FleetLeed',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': [
+          {
+            'text': 'Dashboard',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-dashboard'
+          }, {
+            'text': 'My Space',
+            'sref': '',
+            'icon': 'fa fa-qrcode',
+            'submenu': [
+              {
+                'text': 'Space 1',
+                'sref': 'app.portal',
+                'icon': 'fa fa-qrcode',
+                'params': {
+                  pid: "1"
+                }
+              }, {
+                'text': 'Space 2',
+                'sref': 'app.portal',
+                'icon': 'fa fa-qrcode',
+                'params': {
+                  pid: "2"
+                }
+              }
+            ]
+          }, {
+            'text': 'Reports',
+            'sref': '',
+            'icon': 'fa fa-file-text',
+            'submenu': [
+              {
+                'text': 'Device in Operation',
+                'sref': 'app.devicelist',
+                'icon': 'fa fa-hdd-o',
+                'params': {
+                  search: "LastContactTime=" + yesterdayString + "-" + todayString
+                }
+              }
+            ]
+          }
+        ]
+      }, {
+        'text': 'Mojio Admin',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': [
+          {
+            'text': 'Dashboard',
             'sref': 'app.admindashboard',
             'icon': 'fa fa-dashboard'
           }, {
-            text: 'MyMojio Dashboard',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-dashboard'
+            'text': 'Device',
+            'sref': '',
+            'icon': 'fa fa-cubes',
+            'submenu': [
+              {
+                'text': 'Device List',
+                'sref': 'app.devicelist',
+                'icon': 'fa fa-hdd-o'
+              }, {
+                'text': 'Configuration List',
+                'sref': 'app.configlist',
+                'icon': 'fa fa-sliders'
+              }, {
+                'text': 'Firmware List',
+                'sref': 'app.firmwarelist',
+                'icon': 'fa fa-plug'
+              }, {
+                'text': 'Sim Card List',
+                'sref': 'app.simcardlist',
+                'icon': 'fa fa-mobile'
+              }
+            ]
+          }, {
+            'text': 'Reports',
+            'sref': '',
+            'icon': 'fa fa-file-text',
+            'submenu': [
+              {
+                'text': 'Device in Operation',
+                'sref': 'app.devicelist',
+                'icon': 'fa fa-hdd-o',
+                'params': {
+                  search: "LastContactTime=" + yesterdayString + "-" + todayString
+                }
+              }
+            ]
+          }, {
+            'text': 'Inventory',
+            'sref': '',
+            'icon': 'fa fa-upload',
+            'submenu': [
+              {
+                'text': 'Import Mojio Devices',
+                'sref': 'app.importdevices',
+                'icon': 'fa fa-upload'
+              }, {
+                'text': 'Import Mojio SIMs',
+                'sref': 'app.importsims',
+                'icon': 'fa fa-mobile'
+              }
+            ]
+          }, {
+            'text': 'Utility',
+            'sref': '',
+            'icon': 'fa fa-gears',
+            'submenu': [
+              {
+                'text': 'Operation List',
+                'sref': 'app.operations',
+                'icon': 'fa fa-tasks'
+              }
+            ]
           }
         ]
       }, {
-        'text': 'My Space',
+        'text': 'Developer',
         'sref': '',
-        'icon': 'fa fa-qrcode',
-        'submenu': [
-          {
-            'text': 'Space 1',
-            'sref': 'app.portal',
-            'icon': 'fa fa-qrcode',
-            'params': {
-              pid: "1"
-            }
-          }, {
-            'text': 'Space 2',
-            'sref': 'app.portal',
-            'icon': 'fa fa-qrcode',
-            'params': {
-              pid: "2"
-            }
-          }
-        ]
-      }, {
-        'text': 'Device',
-        'sref': '',
-        'icon': 'fa fa-cubes',
-        'submenu': [
-          {
-            'text': 'Device List',
-            'sref': 'app.devicelist',
-            'icon': 'fa fa-hdd-o'
-          }, {
-            'text': 'Configuration List',
-            'sref': 'app.configlist',
-            'icon': 'fa fa-sliders'
-          }, {
-            'text': 'Firmware List',
-            'sref': 'app.firmwarelist',
-            'icon': 'fa fa-plug'
-          }, {
-            'text': 'Sim Card List',
-            'sref': 'app.simcardlist',
-            'icon': 'fa fa-mobile'
-          }
-        ]
-      }, {
-        'text': 'Reports',
-        'sref': '',
-        'icon': 'fa fa-file-text',
-        'submenu': [
-          {
-            'text': 'Device in Operation',
-            'sref': 'app.devicelist',
-            'icon': 'fa fa-hdd-o',
-            'params': {
-              search: "LastContactTime=" + yesterdayString + "-" + todayString
-            }
-          }
-        ]
-      }, {
-        'text': 'Inventory',
-        'sref': '',
-        'icon': 'fa fa-upload',
-        'submenu': [
-          {
-            'text': 'Import Mojio Devices',
-            'sref': 'app.importdevices',
-            'icon': 'fa fa-upload'
-          }, {
-            'text': 'Import Mojio SIMs',
-            'sref': 'app.importsims',
-            'icon': 'fa fa-mobile'
-          }
-        ]
-      }, {
-        'text': 'Utility',
-        'sref': '',
-        'icon': 'fa fa-gears',
-        'submenu': [
-          {
-            'text': 'Operation List',
-            'sref': 'app.operations',
-            'icon': 'fa fa-tasks'
-          }
-        ]
+        'icon': 'fa fa-file-o',
+        'submenu': []
       }
     ];
     collapseList = [];
@@ -949,22 +1006,30 @@ App.controller('UserBlockController', [
       restrict: 'EA',
       template: '<div></div>',
       replace: true,
-      link: function($scope, element, attrs) {
-        var data, labels, lineColors, xLabelFormat, xkey, ykeys;
-        data = $scope[attrs.data];
-        xkey = $scope[attrs.xkey];
-        ykeys = $scope[attrs.ykeys];
-        labels = $scope[attrs.labels];
-        xLabelFormat = $scope[attrs.xLabelFormat];
-        lineColors = $scope[attrs.lineColors];
+      scope: {
+        data: "=",
+        xkey: "=",
+        ykeys: "=",
+        labels: "=",
+        xLabelFormat: "=",
+        lineColors: "="
+      },
+      link: function(scope, element, attrs) {
+
+        /*
+        data = attrs.data
+        xkey = attrs.xkey
+        ykeys= attrs.ykeys
+        labels= attrs.labels
+        xLabelFormat = attrs.xLabelFormat
+        lineColors = attrs.lineColors
+         */
         Morris.Line({
           element: element,
-          data: data,
-          xkey: xkey,
-          ykeys: ykeys,
-          labels: labels,
-          xLabelFormat: xLabelFormat,
-          lineColors: lineColors
+          data: scope.data,
+          xkey: scope.xkey,
+          ykeys: scope.ykeys,
+          labels: scope.labels
         });
       }
     };
@@ -2372,23 +2437,25 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
-  var mymojioDashboardController;
-  mymojioDashboardController = function($rootScope, $stateParams, $scope, mojioRemote) {
+  var mymojioCarsController;
+  mymojioCarsController = function($rootScope, $stateParams, $scope, mojioRemote) {
     var prepareData;
     $scope.tabset = {
       tabs: []
     };
-    mojioRemote.GET('vehicles', 10, 0, "", null, function(result) {
+    mojioRemote.GET('vehicles', 10, 0, "Mazda 3", null, function(result) {
+      var t;
       $scope.tabset.tabs = angular.copy(result.Data);
       if ($scope.tabset.tabs.length > 0) {
-        return $scope.tabset.tabs[0]._active = true;
+        t = $scope.tabset.tabs[0];
+        t._active = true;
+        return prepareData(t);
       }
     }, function(result) {
       return $scope.tabset.tabs = [];
     });
     $scope.changeTab = function(v) {
       var i, len, ref, veh;
-      console.log("change");
       ref = $scope.tabset.tabs;
       for (i = 0, len = ref.length; i < len; i++) {
         veh = ref[i];
@@ -2400,7 +2467,195 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         prepareData(v);
       }
     };
-    return prepareData = function(v) {};
+    return prepareData = function(v) {
+      var next, nextString, past, pastString, today, todayString;
+      if (v.ready) {
+        return;
+      }
+      today = new Date();
+      past = new Date();
+      past.setDate((new Date()).getDate() - 30);
+      next = new Date();
+      next.setDate((new Date()).getDate() + 1);
+      todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
+      pastString = past.getFullYear() + "." + (past.getMonth() + 1) + "." + past.getDate();
+      nextString = next.getFullYear() + "." + (next.getMonth() + 1) + "." + next.getDate();
+      mojioRemote.GET("Vehicles/" + v._id + "/Trips", 10000, 0, "StartTime=" + pastString + "-" + nextString, null, function(result) {
+        var Distance, Duration, FuelCon, FuelEff, LastDate, NewDate, TripsNo, chartData, ipos, r;
+        chartData = [];
+        FuelCon = 0;
+        FuelEff = 0;
+        Distance = 0;
+        LastDate = "";
+        NewDate = "";
+        r = result.Data;
+        ipos = 0;
+        while (ipos < r.length) {
+          NewDate = new Date(r[ipos].StartTime);
+          NewDate = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
+          if (NewDate !== LastDate) {
+            if (LastDate !== "" && FuelCon !== 0) {
+              chartData.push({
+                y: LastDate,
+                a: FuelCon,
+                b: Distance / FuelCon
+              });
+            }
+            FuelCon = 0;
+            Distance = 0;
+            LastDate = NewDate;
+          }
+          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
+            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
+            Distance += r[ipos].Distance;
+          }
+          ipos++;
+        }
+        v.ChartData = chartData;
+        v.Chart = {
+          xkey: 'y',
+          ykeys: ['a', 'b'],
+          labels: ['a', 'b'],
+          lineColors: ['#36B249', '#36B249']
+        };
+        FuelCon = 0;
+        FuelEff = 0;
+        Distance = 0;
+        TripsNo = 0;
+        Duration = 0;
+        ipos = 0;
+        while (ipos < r.length) {
+          TripsNo++;
+          Duration += ((new Date(r[ipos].EndTime)) - (new Date(r[ipos].StartTime))) / 1000;
+          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
+            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
+            Distance += r[ipos].Distance;
+            FuelEff = Distance / FuelCon;
+          }
+          ipos++;
+        }
+        v.Stat = {
+          TripsNo: TripsNo,
+          FuelCon: FuelCon,
+          FuelEff: FuelEff,
+          Distance: Distance,
+          Duration: Duration
+        };
+        return v.ready = true;
+      });
+    };
+  };
+  module.controller('mymojioCarsController', mymojioCarsController);
+})(angular.module('angle'));
+
+(function(module) {
+  var mymojioDashboardController;
+  mymojioDashboardController = function($rootScope, $stateParams, $scope, mojioRemote) {
+    var prepareData;
+    $scope.tabset = {
+      tabs: []
+    };
+    mojioRemote.GET('vehicles', 10, 0, "Mazda 3", null, function(result) {
+      var t;
+      $scope.tabset.tabs = angular.copy(result.Data);
+      if ($scope.tabset.tabs.length > 0) {
+        t = $scope.tabset.tabs[0];
+        t._active = true;
+        return prepareData(t);
+      }
+    }, function(result) {
+      return $scope.tabset.tabs = [];
+    });
+    $scope.changeTab = function(v) {
+      var i, len, ref, veh;
+      ref = $scope.tabset.tabs;
+      for (i = 0, len = ref.length; i < len; i++) {
+        veh = ref[i];
+        if (veh === v) {
+          veh._active = true;
+        } else {
+          veh._active = false;
+        }
+        prepareData(v);
+      }
+    };
+    return prepareData = function(v) {
+      var next, nextString, past, pastString, today, todayString;
+      if (v.ready) {
+        return;
+      }
+      today = new Date();
+      past = new Date();
+      past.setDate((new Date()).getDate() - 30);
+      next = new Date();
+      next.setDate((new Date()).getDate() + 1);
+      todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
+      pastString = past.getFullYear() + "." + (past.getMonth() + 1) + "." + past.getDate();
+      nextString = next.getFullYear() + "." + (next.getMonth() + 1) + "." + next.getDate();
+      mojioRemote.GET("Vehicles/" + v._id + "/Trips", 10000, 0, "StartTime=" + pastString + "-" + nextString, null, function(result) {
+        var Distance, Duration, FuelCon, FuelEff, LastDate, NewDate, TripsNo, chartData, ipos, r;
+        chartData = [];
+        FuelCon = 0;
+        FuelEff = 0;
+        Distance = 0;
+        LastDate = "";
+        NewDate = "";
+        r = result.Data;
+        ipos = 0;
+        while (ipos < r.length) {
+          NewDate = new Date(r[ipos].StartTime);
+          NewDate = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
+          if (NewDate !== LastDate) {
+            if (LastDate !== "" && FuelCon !== 0) {
+              chartData.push({
+                y: LastDate,
+                a: FuelCon,
+                b: Distance / FuelCon
+              });
+            }
+            FuelCon = 0;
+            Distance = 0;
+            LastDate = NewDate;
+          }
+          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
+            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
+            Distance += r[ipos].Distance;
+          }
+          ipos++;
+        }
+        v.ChartData = chartData;
+        v.Chart = {
+          xkey: 'y',
+          ykeys: ['a', 'b'],
+          labels: ['a', 'b'],
+          lineColors: ['#36B249', '#36B249']
+        };
+        FuelCon = 0;
+        FuelEff = 0;
+        Distance = 0;
+        TripsNo = 0;
+        Duration = 0;
+        ipos = 0;
+        while (ipos < r.length) {
+          TripsNo++;
+          Duration += ((new Date(r[ipos].EndTime)) - (new Date(r[ipos].StartTime))) / 1000;
+          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
+            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
+            Distance += r[ipos].Distance;
+            FuelEff = Distance / FuelCon;
+          }
+          ipos++;
+        }
+        v.Stat = {
+          TripsNo: TripsNo,
+          FuelCon: FuelCon,
+          FuelEff: FuelEff,
+          Distance: Distance,
+          Duration: Duration
+        };
+        return v.ready = true;
+      });
+    };
   };
   module.controller('mymojioDashboardController', mymojioDashboardController);
 })(angular.module('angle'));
@@ -2777,6 +3032,30 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
   };
   module.controller('portalController', portalController);
 })(angular.module('angle'));
+
+angular.module('angle').filter('hhmmss', function() {
+  return function(sec) {
+    var toHHMMSS;
+    toHHMMSS = function(sec) {
+      var hours, minutes, sec_num, seconds;
+      sec_num = parseInt(sec, 10);
+      hours = Math.floor(sec_num / 3600);
+      minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+      seconds = sec_num - (hours * 3600) - (minutes * 60);
+      if (hours < 10) {
+        hours = "0" + hours;
+      }
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      return hours + ':' + minutes + ':' + seconds;
+    };
+    return toHHMMSS(sec);
+  };
+});
 
 angular.module('angle').filter('mojioTitle', ["dateFilter", function(dateFilter) {
   return function(data) {
@@ -3388,23 +3667,6 @@ angular.module('angle').filter('timeago', function() {
       templateUrl: 'app/views/widget_vehicle_report.html',
       controller: function($rootScope, $scope, mojioGlobal, mojioRemote) {
         $scope.range = 20;
-        $scope.toHHMMSS = function(sec) {
-          var hours, minutes, sec_num, seconds;
-          sec_num = parseInt(sec, 10);
-          hours = Math.floor(sec_num / 3600);
-          minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-          seconds = sec_num - (hours * 3600) - (minutes * 60);
-          if (hours < 10) {
-            hours = "0" + hours;
-          }
-          if (minutes < 10) {
-            minutes = "0" + minutes;
-          }
-          if (seconds < 10) {
-            seconds = "0" + seconds;
-          }
-          return hours + ':' + minutes + ':' + seconds;
-        };
         $scope.prepareData = function() {
           if (typeof $scope.UserID === "undefined") {
             $scope.UserID = mojioGlobal.data.user_data.id;

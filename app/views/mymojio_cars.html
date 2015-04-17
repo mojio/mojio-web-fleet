@@ -1,6 +1,6 @@
-<h3>Dashboard</h3>
+<h3>My Cars</h3>
 <!-- START widgets box-->
-<div ng-controller="mymojioDashboardController" class="row">
+<div ng-controller="mymojioCarsController" class="row">
    <tabset>
       <tab ng-repeat="vehicle in tabset.tabs" select="changeTab(vehicle)">
          <tab-heading><i class="fa fa-car">&nbsp;</i>
@@ -10,35 +10,23 @@
          <div class="row">
             <div class="col-md-3">
                <div class="panel panel-primary">
-                  <div class="panel-heading">My Car's Health</div>
+                  <div class="panel-heading"><i class="fa fa fa-car"></i>&nbsp; My Car's Status</div>
                   <div class="panel-body">
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-dashboard"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;Excellent Health</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;0 DTC Fault</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;27% Remaining</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-openid"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;135 km Range</div>
-                     </div>
+                     <h4>Parked</h4>
+                  </div>
+               </div>
+               <div class="panel panel-primary">
+                  <div class="panel-heading"><i class="fa fa fa-cubes"></i>&nbsp; Device</div>
+                  <div class="panel-body">
+                     <h4>Status: Disconnected</h4>
+                     <h4>IMEI: 2343423423423</h4>
                   </div>
                </div>
             </div>
             <div class="col-md-9">
                <div class="panel panel-primary">
-                  <div class="panel-heading">My Car's Location</div>
-                  <div ng-if="vehicle._active" style="height: 300px" mojio-simple-map="mojio-simple-map" geoloc="vehicle.LastLocation" class="panel-body"></div>
+                  <div class="panel-heading">Notifications</div>
+                  <div class="panel-body"></div>
                </div>
             </div>
             <div class="col-md-3">
