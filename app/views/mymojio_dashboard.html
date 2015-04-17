@@ -1,101 +1,40 @@
 <h3>Dashboard</h3>
 <!-- START widgets box-->
 <div ng-controller="mymojioDashboardController" class="row">
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Total Number of Mojios</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <div class="fa fa-cubes fa-2x"></div>
+   <tabset>
+      <tab ng-repeat="vehicle in tabset.tabs" select="changeTab(vehicle)">
+         <tab-heading><i class="fa fa-car">&nbsp;</i>
+            <span ng-if="vehicle.Name!=null">{{vehicle.Name}}</span>
+            <span ng-if="vehicle.Name==null">No Name</span>
+         </tab-heading>
+         <div class="row">
+            <div class="col-md-3">
+               <div class="panel panel-primary">
+                  <div class="panel-heading">My Car's Health</div>
+                  <div class="panel-body">Body</div>
+               </div>
             </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{mojiosTotal}}</strong>
+            <div class="col-md-9">
+               <div class="panel panel-primary">
+                  <div class="panel-heading">My Car's Location</div>
+                  <div ng-if="vehicle._active" style="height: 300px" mojio-simple-map="mojio-simple-map" geoloc="vehicle.LastLocation" class="panel-body"></div>
+               </div>
             </div>
-         </div>
-      </div>
-   </div>
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Total Number of Cars</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <em class="fa fa-car fa-2x"></em>
+            <div class="col-md-3">
+               <div class="panel panel-primary">
+                  <div class="panel-heading">My Car's Report</div>
+                  <div class="panel-body">Body</div>
+               </div>
             </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{carsTotal}}</strong>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Total Number of Users</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <em class="fa fa-users fa-2x"></em>
-            </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{usersTotal}}</strong>
+            <div class="col-md-9">
+               <div class="panel panel-primary">
+                  <div class="panel-heading">My Car's Chart</div>
+                  <div class="panel-body">
+                     <morris-chart xkey="xkey" ykeys="ykeys" labels="labels" data="myModel" ng-if="myModel"></morris-chart>
+                  </div>
+               </div>
             </div>
          </div>
-      </div>
-   </div>
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Total Number of Trips</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <em class="fa fa-openid fa-2x"></em>
-            </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{tripsTotal}}</strong>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Number of Driving Cars</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <em class="fa fa-car fa-2x"></em>
-            </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{carsDriving}}</strong>
-            </div>
-         </div>
-      </div>
-   </div>
-   <div class="col-sm-3">
-      <!-- START widget-->
-      <div class="panel widget">
-         <div class="row row-table">
-            <div class="col-xs-12 text-center">Number of Connected Cars</div>
-         </div>
-         <div class="row row-table">
-            <div class="col-xs-4">
-               <em class="fa fa-car fa-2x"></em>
-            </div>
-            <div class="col-xs-8">
-               <strong class="lead">{{carsConnected}}</strong>
-            </div>
-         </div>
-      </div>
-   </div>
+      </tab>
+   </tabset>
 </div>
-<!-- END widgets box-->
