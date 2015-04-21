@@ -1,67 +1,6 @@
 <!--Created by pooyaparidel on 15-03-27.
 -->
 <span data-alias="UserMojioGrid" data-mojioapi="{{api}}">
-   <accordion ng-if="searchImei==true || searchProperty==true">
-      <accordion-group ng-if="searchImei" heading="Search By IMEI" is-open="false">
-         <div class="form-group col-lg-3">
-            <label>IMEI</label>
-            <input name="imei" class="form-control" />
-            <br/>
-            <button ng-click="newSearch(0)" class="btn btn-default">
-               <li class="fa fa-search"></li>Search</button>
-         </div>
-      </accordion-group>
-      <accordion-group ng-if="searchProperty" heading="Search By Device Peroperties" is-open="false">
-         <h4>Device Properties
-            <div class="form-group col-lg-3"></div>
-            <label>Firmware</label>
-            <input name="firmware" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Configuration</label>
-            <input name="Configuration" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Serial Number</label>
-            <input name="serialNumber" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Part Number</label>
-            <input name="partNumber" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Device Type</label>
-            <select name="deviceType" class="form-control">
-               <option value=""></option>
-               <option value="Xirgo">Xirgo</option>
-               <option value="MDI">MDI</option>
-            </select>
-            <div class="clearfix"></div>
-            <h4>Device Update</h4>
-            <div class="form-group col-lg-3"></div>
-            <label>Device Type
-               <select multiple="multiple" name="deviceType" class="form-control"></select>
-               <option value="Aborted">Aborted</option>
-               <option value="Failed">Failed</option>
-               <option value="Deployed">Deployed</option>
-               <option value="Launched">Launched</option>
-               <option value="Complete">Complete</option>
-            </label>
-            <div class="form-group col-lg-3"></div>
-            <label>Configuration Stamp</label>
-            <input name="configurationStamp" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Firmware Stamp</label>
-            <input name="firmwareStamp" class="form-control" />
-            <div class="form-group col-lg-3"></div>
-            <label>Update Type
-               <select name="updateType" class="form-control"></select>
-               <option value=""></option>
-               <option value="Configuration">Configuration</option>
-               <option value="firmware">Firmware</option>
-            </label>
-            <div class="form-group col-lg-12"></div>
-            <button ng-click="newSearch(1)" class="btn btn-default">
-               <li class="fa fa-search"></li>Search</button>
-         </h4>
-      </accordion-group>
-   </accordion>
    <span st-pipe="callServer" st-table="displayed">
       <div ng-show="selectedRow==null" ng-if="settings" class="pull-right">
          <div dropdown="dropdown" class="btn-group">
@@ -100,12 +39,12 @@
          <table class="table table-hover table-bordered table-striped table-condensed">
             <thead ng-show="selectedRow==null">
                <tr>
-                  <th colspan="2"><i class="fa fa-hdd-o fa-2x"></i>
+                  <th colspan="2"><i class="fa fa-bolt fa-2x"></i>
                   </th>
-                  <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">IMEI</th>
-                  <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">NAME</th>
-                  <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">STATE</th>
-                  <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">CONTACT</th>
+                  <th ng-show="s.f[0].show" data-show="true" st-sort="IMEI" class="fieldHeader">Type</th>
+                  <th ng-show="s.f[1].show" data-show="true" st-sort="NAME" class="fieldHeader">Notification</th>
+                  <th ng-show="s.f[2].show" data-show="true" st-sort="STATE" class="fieldHeader">Time</th>
+                  <th ng-show="s.f[3].show" data-show="true" st-sort="CONTACT" class="fieldHeader">Location</th>
                </tr>
             </thead>
             <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
@@ -120,12 +59,14 @@
                         <li class="fa fa-code"></li>
                      </a>
                   </td>
-                  <td ng-if="adminMode" ng-show="s.f[0].show"><a href="" ng-click="showDetailView('admin.devicedetail','deviceRow',row)">{{row.Imei}}</a>
+                  <td ng-show="s.f[0].show">
+                     <notification-icon type="{{row.EventType}}"></notification-icon>
                   </td>
-                  <td ng-if="!adminMode" ng-show="s.f[0].show">{{row.Imei}}</td>
-                  <td ng-show="s.f[1].show">{{row.Name}}</td>
-                  <td ng-show="s.f[2].show">{{row.DevicePrivate.DeviceUpdate.UpdateState}}</td>
-                  <td ng-show="s.f[3].show">{{row.LastContactTime | date:'yy-MM-dd HH:mm'}}</td>
+                  <td ng-show="s.f[1].show">{{row.EventType}}</td>
+                  <td ng-show="s.f[2].show">{{row.Time | date:'yy-MM-dd HH:mm'}}</td>
+                  <td ng-show="s.f[3].show">
+                     <mojio-location geoloc="row.Location"></mojio-location>
+                  </td>
                </tr>
             </tbody>
             <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;" ng-if="rowDetail!='off'">

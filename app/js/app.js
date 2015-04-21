@@ -16,6 +16,7 @@ if (typeof $ === 'undefined') {
 
 App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage', 'ngCookies', 'pascalprecht.translate', 'ui.bootstrap', 'ui.router', 'cfp.loadingBar', 'ngSanitize', 'ngResource', 'ui.utils', 'toaster', 'jsonFormatter']).run([
   'mojioGlobal', '$rootScope', '$state', '$stateParams', '$window', '$templateCache', function(mojioGlobal, $rootScope, $state, $stateParams, $window, $templateCache) {
+    var today, todayString, yesterday, yesterdayString;
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
     $rootScope.$storage = $window.localStorage;
@@ -39,12 +40,201 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         isRTL: false,
         horizontal: false,
         isFloat: false,
-        asideHover: false
+        asideHover: false,
+        theme: 'e'
       },
       useFullLayout: false,
       hiddenFooter: false,
       viewAnimation: 'ng-fadeInUp'
     };
+    today = new Date();
+    yesterday = new Date();
+    yesterday.setDate((new Date()).getDate() - 1);
+    todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
+    yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
+    $rootScope.sidebarMenuData = [
+      {
+        'text': 'MyMojio',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': [
+          {
+            'text': 'Dashboard',
+            'sref': 'my.dashboard',
+            'icon': 'fa fa-dashboard'
+          }, {
+            'text': 'My Cars',
+            'sref': 'my.cars',
+            'icon': 'fa fa-car'
+          }, {
+            'text': 'My Trips',
+            'sref': 'my.dashboard',
+            'icon': 'fa fa-openid'
+          }, {
+            'text': 'Notification List',
+            'sref': 'my.notifications',
+            'icon': 'fa fa-bolt'
+          }, {
+            'text': 'My Account',
+            'sref': 'my.dashboard',
+            'icon': 'fa fa-user'
+          }, {
+            'text': 'Support',
+            'sref': 'my.dashboard',
+            'icon': 'fa fa-question-circle'
+          }
+        ]
+      }, {
+        'text': 'FleetLeed',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': [
+          {
+            'text': 'Dashboard',
+            'sref': 'app.mymojiodashboard',
+            'icon': 'fa fa-dashboard'
+          }, {
+            'text': 'My Space',
+            'sref': '',
+            'icon': 'fa fa-qrcode',
+            'submenu': [
+              {
+                'text': 'Space 1',
+                'sref': 'app.portal',
+                'icon': 'fa fa-qrcode',
+                'params': {
+                  pid: "1"
+                }
+              }, {
+                'text': 'Space 2',
+                'sref': 'app.portal',
+                'icon': 'fa fa-qrcode',
+                'params': {
+                  pid: "2"
+                }
+              }
+            ]
+          }, {
+            'text': 'Reports',
+            'sref': '',
+            'icon': 'fa fa-file-text',
+            'submenu': [
+              {
+                'text': 'Device in Operation',
+                'sref': 'app.devicelist',
+                'icon': 'fa fa-hdd-o',
+                'params': {
+                  search: "LastContactTime=" + yesterdayString + "-" + todayString
+                }
+              }
+            ]
+          }
+        ]
+      }, {
+        'text': 'Mojio Admin',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': [
+          {
+            'text': 'Dashboard',
+            'sref': 'admin.dashboard',
+            'icon': 'fa fa-dashboard'
+          }, {
+            'text': 'Device',
+            'sref': '',
+            'icon': 'fa fa-cubes',
+            'submenu': [
+              {
+                'text': 'Device List',
+                'sref': 'admin.devicelist',
+                'icon': 'fa fa-hdd-o'
+              }, {
+                'text': 'Configuration List',
+                'sref': 'admin.configlist',
+                'icon': 'fa fa-sliders'
+              }, {
+                'text': 'Firmware List',
+                'sref': 'admin.firmwarelist',
+                'icon': 'fa fa-plug'
+              }, {
+                'text': 'Sim Card List',
+                'sref': 'admin.simcardlist',
+                'icon': 'fa fa-mobile'
+              }
+            ]
+          }, {
+            'text': 'Reports',
+            'sref': '',
+            'icon': 'fa fa-file-text',
+            'submenu': [
+              {
+                'text': 'Device in Operation',
+                'sref': 'admin.devicelist',
+                'icon': 'fa fa-hdd-o',
+                'params': {
+                  search: "LastContactTime=" + yesterdayString + "-" + todayString
+                }
+              }
+            ]
+          }, {
+            'text': 'Inventory',
+            'sref': '',
+            'icon': 'fa fa-upload',
+            'submenu': [
+              {
+                'text': 'Import Mojio Devices',
+                'sref': 'admin.importdevices',
+                'icon': 'fa fa-cubes'
+              }, {
+                'text': 'Import Mojio SIMs',
+                'sref': 'admin.importsims',
+                'icon': 'fa fa-mobile'
+              }, {
+                'text': 'Download Data',
+                'sref': 'admin.downloaddata',
+                'icon': 'fa fa-download'
+              }
+            ]
+          }, {
+            'text': 'Utility',
+            'sref': '',
+            'icon': 'fa fa-gears',
+            'submenu': [
+              {
+                'text': 'Operation List',
+                'sref': 'admin.operations',
+                'icon': 'fa fa-tasks'
+              }
+            ]
+          }
+        ]
+      }, {
+        'text': 'Developer',
+        'sref': '',
+        'icon': 'fa fa-file-o',
+        'submenu': []
+      }, {
+        'text': 'Mojio IDE',
+        'sref': '',
+        'icon': 'fa fa-fire',
+        'submenu': [
+          {
+            'text': 'Application Settings',
+            'sref': 'ide.appsettings',
+            'icon': 'fa fa-tasks'
+          }, {
+            'text': 'Manage Pages',
+            'sref': 'ide.managepages',
+            'icon': 'fa fa-th-large',
+            "alert": "new"
+          }, {
+            'text': 'Publish',
+            'sref': 'ide.publish',
+            'icon': 'fa fa-download'
+          }
+        ]
+      }
+    ];
     $rootScope.user = {
       name: '',
       job: 'Admin',
@@ -63,76 +253,88 @@ App.config([
   '$stateProvider', '$locationProvider', '$urlRouterProvider', 'RouteHelpersProvider', function($stateProvider, $locationProvider, $urlRouterProvider, helper) {
     'use strict';
     $locationProvider.html5Mode(false);
-    $urlRouterProvider.otherwise('/app/admindashboard');
+    $urlRouterProvider.otherwise('/admin/dashboard');
+    $stateProvider.state('admin', {
+      url: '/admin',
+      abstract: true,
+      templateUrl: helper.basepath('app.html'),
+      controller: 'AppController'
+    }).state('admin.dashboard', {
+      url: '/dashboard',
+      title: 'Admin Dashboard',
+      templateUrl: helper.basepath('admin_dashboard.html')
+    }).state('admin.devicelist', {
+      url: '/devicelist/:search',
+      title: 'Device List',
+      templateUrl: helper.basepath('devicelist.html')
+    }).state('admin.devicedetail', {
+      url: '/devicedetail/:id',
+      title: 'Device Management',
+      templateUrl: helper.basepath('devicedetail.html')
+    }).state('admin.configlist', {
+      url: '/configlist',
+      title: 'Config List',
+      templateUrl: helper.basepath('configlist.html')
+    }).state('admin.configdetail', {
+      url: '/configdetail/:id',
+      title: 'Config Detail',
+      templateUrl: helper.basepath('configdetail.html')
+    }).state('admin.firmwarelist', {
+      url: '/firmwarelist',
+      title: 'Firmware List',
+      templateUrl: helper.basepath('firmwarelist.html')
+    }).state('admin.firmwaredetail', {
+      url: '/firmwaredetail/:id',
+      title: 'Firmware Detail',
+      templateUrl: helper.basepath('firmwaredetail.html')
+    }).state('admin.simcardlist', {
+      url: '/simcardlist',
+      title: 'SIM Card List',
+      templateUrl: helper.basepath('simcard.html')
+    }).state('admin.adminsearch', {
+      url: '/search/:key',
+      title: 'Admin Search',
+      templateUrl: helper.basepath('adminsearch.html')
+    }).state('admin.operations', {
+      url: '/operations',
+      title: 'Operation List',
+      templateUrl: helper.basepath('operations_list.html')
+    }).state('admin.importdevices', {
+      url: '/importdevices',
+      title: 'Import Mojio Devices',
+      templateUrl: helper.basepath('import_devices.html')
+    }).state('admin.importsims', {
+      url: '/importsims',
+      title: 'Import SIMs',
+      templateUrl: helper.basepath('import_sims.html')
+    });
     $stateProvider.state('app', {
       url: '/app',
       abstract: true,
       templateUrl: helper.basepath('app.html'),
       controller: 'AppController'
-    }).state('app.mymojiodashboard', {
-      url: '/mymojiodashboard',
-      title: 'MyMojio Dashboard',
-      templateUrl: helper.basepath('mymojio_dashboard.html')
-    }).state('app.mymojiocars', {
-      url: '/mymojicars',
-      title: 'My Cars',
-      templateUrl: helper.basepath('mymojio_cars.html')
-    }).state('app.admindashboard', {
-      url: '/admindashboard',
-      title: 'Admin Dashboard',
-      templateUrl: helper.basepath('admin_dashboard.html')
-    }).state('app.devicelist', {
-      url: '/devicelist/:search',
-      title: 'Device List',
-      templateUrl: helper.basepath('devicelist.html')
-    }).state('app.devicedetail', {
-      url: '/devicedetail/:id',
-      title: 'Device Management',
-      templateUrl: helper.basepath('devicedetail.html')
-    }).state('app.configlist', {
-      url: '/configlist',
-      title: 'Config List',
-      templateUrl: helper.basepath('configlist.html')
-    }).state('app.configdetail', {
-      url: '/configdetail/:id',
-      title: 'Config Detail',
-      templateUrl: helper.basepath('configdetail.html')
-    }).state('app.firmwarelist', {
-      url: '/firmwarelist',
-      title: 'Firmware List',
-      templateUrl: helper.basepath('firmwarelist.html')
-    }).state('app.firmwaredetail', {
-      url: '/firmwaredetail/:id',
-      title: 'Firmware Detail',
-      templateUrl: helper.basepath('firmwaredetail.html')
-    }).state('app.simcardlist', {
-      url: '/simcardlist',
-      title: 'SIM Card List',
-      templateUrl: helper.basepath('simcard.html')
-    }).state('app.adminsearch', {
-      url: '/adminsearch/:key',
-      title: 'Admin Search',
-      templateUrl: helper.basepath('adminsearch.html')
-    }).state('app.operations', {
-      url: '/operations',
-      title: 'Operation List',
-      templateUrl: helper.basepath('operations_list.html')
-    }).state('app.importdevices', {
-      url: '/importdevices',
-      title: 'Import Mojio Devices',
-      templateUrl: helper.basepath('import_devices.html')
-    }).state('app.importsims', {
-      url: '/importsims',
-      title: 'Import SIMs',
-      templateUrl: helper.basepath('import_sims.html')
-    }).state('app.observe', {
-      url: '/observe',
-      title: 'observe',
-      templateUrl: helper.basepath('observe.html')
     }).state('app.portal', {
       url: '/portal/:pid/:full?',
       title: 'Portal',
       templateUrl: helper.basepath('portal.html')
+    });
+    $stateProvider.state('my', {
+      url: '/my',
+      abstract: true,
+      templateUrl: helper.basepath('app.html'),
+      controller: 'AppController'
+    }).state('my.dashboard', {
+      url: '/dashboard',
+      title: 'MyMojio Dashboard',
+      templateUrl: helper.basepath('mymojio_dashboard.html')
+    }).state('my.cars', {
+      url: '/mymojicars',
+      title: 'My Cars',
+      templateUrl: helper.basepath('mymojio_cars.html')
+    }).state('my.notifications', {
+      url: '/notifications',
+      title: 'My Notifications',
+      templateUrl: helper.basepath('notification_list.html')
     });
   }
 ]).config([
@@ -617,167 +819,8 @@ App.controller('AppController', [
  */
 App.controller('SidebarController', [
   '$rootScope', '$scope', '$state', '$http', '$timeout', 'Utils', function($rootScope, $scope, $state, $http, $timeout, Utils) {
-    var closeAllBut, collapseList, isActive, isChild, sidebarMenuData, today, todayString, yesterday, yesterdayString;
-    today = new Date();
-    yesterday = new Date();
-    yesterday.setDate((new Date()).getDate() - 1);
-    todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
-    yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
-    sidebarMenuData = [
-      {
-        'text': 'MyMojio',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
-          {
-            'text': 'Dashboard',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-dashboard'
-          }, {
-            'text': 'My Cars',
-            'sref': 'app.mymojiocars',
-            'icon': 'fa fa-car'
-          }, {
-            'text': 'My Trips',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-openid'
-          }, {
-            'text': 'My Account',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-user'
-          }, {
-            'text': 'Support',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-question-circle'
-          }
-        ]
-      }, {
-        'text': 'FleetLeed',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
-          {
-            'text': 'Dashboard',
-            'sref': 'app.mymojiodashboard',
-            'icon': 'fa fa-dashboard'
-          }, {
-            'text': 'My Space',
-            'sref': '',
-            'icon': 'fa fa-qrcode',
-            'submenu': [
-              {
-                'text': 'Space 1',
-                'sref': 'app.portal',
-                'icon': 'fa fa-qrcode',
-                'params': {
-                  pid: "1"
-                }
-              }, {
-                'text': 'Space 2',
-                'sref': 'app.portal',
-                'icon': 'fa fa-qrcode',
-                'params': {
-                  pid: "2"
-                }
-              }
-            ]
-          }, {
-            'text': 'Reports',
-            'sref': '',
-            'icon': 'fa fa-file-text',
-            'submenu': [
-              {
-                'text': 'Device in Operation',
-                'sref': 'app.devicelist',
-                'icon': 'fa fa-hdd-o',
-                'params': {
-                  search: "LastContactTime=" + yesterdayString + "-" + todayString
-                }
-              }
-            ]
-          }
-        ]
-      }, {
-        'text': 'Mojio Admin',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
-          {
-            'text': 'Dashboard',
-            'sref': 'app.admindashboard',
-            'icon': 'fa fa-dashboard'
-          }, {
-            'text': 'Device',
-            'sref': '',
-            'icon': 'fa fa-cubes',
-            'submenu': [
-              {
-                'text': 'Device List',
-                'sref': 'app.devicelist',
-                'icon': 'fa fa-hdd-o'
-              }, {
-                'text': 'Configuration List',
-                'sref': 'app.configlist',
-                'icon': 'fa fa-sliders'
-              }, {
-                'text': 'Firmware List',
-                'sref': 'app.firmwarelist',
-                'icon': 'fa fa-plug'
-              }, {
-                'text': 'Sim Card List',
-                'sref': 'app.simcardlist',
-                'icon': 'fa fa-mobile'
-              }
-            ]
-          }, {
-            'text': 'Reports',
-            'sref': '',
-            'icon': 'fa fa-file-text',
-            'submenu': [
-              {
-                'text': 'Device in Operation',
-                'sref': 'app.devicelist',
-                'icon': 'fa fa-hdd-o',
-                'params': {
-                  search: "LastContactTime=" + yesterdayString + "-" + todayString
-                }
-              }
-            ]
-          }, {
-            'text': 'Inventory',
-            'sref': '',
-            'icon': 'fa fa-upload',
-            'submenu': [
-              {
-                'text': 'Import Mojio Devices',
-                'sref': 'app.importdevices',
-                'icon': 'fa fa-upload'
-              }, {
-                'text': 'Import Mojio SIMs',
-                'sref': 'app.importsims',
-                'icon': 'fa fa-mobile'
-              }
-            ]
-          }, {
-            'text': 'Utility',
-            'sref': '',
-            'icon': 'fa fa-gears',
-            'submenu': [
-              {
-                'text': 'Operation List',
-                'sref': 'app.operations',
-                'icon': 'fa fa-tasks'
-              }
-            ]
-          }
-        ]
-      }, {
-        'text': 'Developer',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': []
-      }
-    ];
+    var closeAllBut, collapseList, isActive, isChild, sidebarMenuData;
+    sidebarMenuData = $rootScope.sidebarMenuData;
     collapseList = [];
     closeAllBut = function(index) {
       var i;
@@ -905,6 +948,50 @@ App.controller('UserBlockController', [
   return module.directive('dynamic', dynamic);
 })(angular.module('angle'));
 
+App.directive('loadCss', ["$rootScope", function($rootScope) {
+  var createLink;
+  createLink = function(uri) {
+    var linkId, oldLink;
+    linkId = 'autoloaded-stylesheet';
+    oldLink = $('#' + linkId).attr('id', linkId + '-old');
+    $('head').append($('<link/>').attr({
+      'id': linkId,
+      'rel': 'stylesheet',
+      'href': uri
+    }));
+    if (oldLink.length) {
+      oldLink.remove();
+    }
+    return $('#' + linkId);
+  };
+  'use strict';
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      element.on('click', function(e) {
+        var link, theme, uri;
+        if (element.is('a')) {
+          e.preventDefault();
+        }
+        uri = attrs.loadCss;
+        theme = attrs.theme;
+        if (theme) {
+          $rootScope.app.layout.theme = theme;
+        }
+        link = void 0;
+        if (uri) {
+          link = createLink(uri);
+          if (!link) {
+            $.error('Error creating stylesheet link element.');
+          }
+        } else {
+          $.error('No stylesheet location defined.');
+        }
+      });
+    }
+  };
+}]);
+
 (function(module) {
   var mojioLocation;
   mojioLocation = function($modal, $templateCache, $compile) {
@@ -933,7 +1020,7 @@ App.controller('UserBlockController', [
             mtitle = scope.geoloc.Lat.toFixed(2) + " , " + scope.geoloc.Lng.toFixed(2);
             text = scope.geoloc.Lat.toFixed(2) + " , " + scope.geoloc.Lng.toFixed(2);
           }
-          element[0].innerHTML = "<a href='#'><li class='fa fa-crosshairs '> " + text + "</a>";
+          element[0].innerHTML = "<a ng-click><li class='fa fa-crosshairs '> " + text + "</a>";
           return element.on('click', function() {
             return scope.modalInstance = $modal.open({
               size: 'lg',
@@ -968,8 +1055,7 @@ App.controller('UserBlockController', [
         geoloc: '='
       },
       link: function(scope, element) {
-        var checkVisibility, lastVisibility, marker, myLatlng, myOptions;
-        console.log("map");
+        var bounds, checkVisibility, extendPoint1, extendPoint2, marker, myLatlng, myOptions;
         myLatlng = new google.maps.LatLng(scope.geoloc.Lat, scope.geoloc.Lng);
         myOptions = {
           zoom: 12,
@@ -987,12 +1073,17 @@ App.controller('UserBlockController', [
           map: scope.map,
           title: "Marker"
         });
-        lastVisibility = null;
+        console.log(scope.geoloc.Lat + ' , ' + scope.geoloc.Lng);
+        bounds = new google.maps.LatLngBounds();
+        extendPoint1 = new google.maps.LatLng(scope.geoloc.Lat + 0.003, scope.geoloc.Lng + 0.003);
+        extendPoint2 = new google.maps.LatLng(scope.geoloc.Lat - 0.003, scope.geoloc.Lng - 0.003);
+        bounds.extend(extendPoint1);
+        bounds.extend(extendPoint2);
         checkVisibility = function() {
           google.maps.event.trigger(scope.map, "resize");
-          window.setTimeout(checkVisibility, 500);
+          scope.map.fitBounds(bounds);
         };
-        checkVisibility();
+        window.setTimeout(checkVisibility, 500);
       }
     };
   };
@@ -1015,21 +1106,13 @@ App.controller('UserBlockController', [
         lineColors: "="
       },
       link: function(scope, element, attrs) {
-
-        /*
-        data = attrs.data
-        xkey = attrs.xkey
-        ykeys= attrs.ykeys
-        labels= attrs.labels
-        xLabelFormat = attrs.xLabelFormat
-        lineColors = attrs.lineColors
-         */
         Morris.Line({
           element: element,
           data: scope.data,
           xkey: scope.xkey,
           ykeys: scope.ykeys,
-          labels: scope.labels
+          labels: scope.labels,
+          lineColors: scope.lineColors
         });
       }
     };
@@ -1074,7 +1157,7 @@ App.directive('searchOpen', [
           if (e.keyCode === 13) {
             param = this.value;
             navSearch.dismiss();
-            $state.go('app.adminsearch', {
+            $state.go('admin.adminsearch', {
               key: param
             });
           }
@@ -1097,6 +1180,63 @@ App.directive('searchOpen', [
     };
   }
 ]);
+
+(function(module) {
+  var notificationIcon;
+  notificationIcon = function() {
+    return {
+      restrict: 'EA',
+      template: '<div class="label {{color}}"><li class="fa {{icon}}"></li></div>',
+      replace: true,
+      scope: false,
+      link: function(scope, element, attrs) {
+        scope.icon = '';
+        scope.color = '';
+        if (attrs.type === "MILWarning") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-danger';
+        }
+        if (attrs.type === "Accident") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-danger';
+        }
+        if (attrs.type === "TowStart") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-danger';
+        }
+        if (attrs.type === "LowBattery") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "ConnectionLost") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "HardAcceleration") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "HardBrake") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "LowFuel") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "Speed") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+        if (attrs.type === "Diagnostic") {
+          scope.icon = 'fa-exclamation-triangle';
+          scope.color = 'label-warning';
+        }
+      }
+    };
+  };
+  return module.directive('notificationIcon', notificationIcon);
+})(angular.module('angle'));
 
 
 /**=========================================================
@@ -1941,7 +2081,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     loadDeviceStats = function() {
       mojioRemote.GET('DeviceStats/', 6, 0, "MojioId = " + $scope._id, null, function(result) {
-        console.log(result);
         $scope.xkey = 'y';
         $scope.ykeys = ['a', 'b'];
         $scope.labels = ['a', 'b'];
@@ -2138,6 +2277,11 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       Name: '',
       Description: ''
     };
+    $scope.DeviceActivity = {
+      To: '',
+      From: ''
+    };
+    $scope.Events = [];
     $scope.LoggingDuration = mojioLocal.staticData.LoggingDuration;
     $scope.watchDevice = function() {
       var EventModel, Mojio, mojio;
@@ -2341,6 +2485,37 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           body: "Error Deploying Update"
         });
       });
+    };
+    $scope.deviceActivityLoadData = function() {
+      var criteria, mdate;
+      if ($scope.DeviceActivity.To === '' || $scope.DeviceActivity.From === '') {
+        toaster.error({
+          title: "Load Data",
+          body: "Please Specify From and To date"
+        });
+        return;
+      }
+      mojioRemote.GET('admin/MojioReports', 1000, 0, '', null, function(result) {
+        return console.log(result);
+      }, function(result) {
+        return console.log("Error");
+      });
+      criteria = "Time=";
+      mdate = new Date($scope.DeviceActivity.From);
+      criteria += mdate.getFullYear() + "." + (mdate.getMonth() + 1) + "." + mdate.getDate();
+      mdate = new Date($scope.DeviceActivity.To);
+      criteria += "-" + mdate.getFullYear() + "." + (mdate.getMonth() + 1) + "." + mdate.getDate();
+      $scope.Events = [];
+      return mojioRemote.GET('mojios/' + $scope._id + '/Events', 1000, 0, criteria, null, function(result) {
+        return $scope.Events = result.Data;
+      }, function(result) {
+        return console.log("Error");
+      });
+    };
+    $scope.deviceActivityExportEvents = function(type) {
+      return saveAs(new Blob([JSON.stringify($scope.Events)], {
+        type: 'application/json'
+      }), "Events.json");
     };
     loadMojio();
   };
@@ -2561,7 +2736,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       if ($scope.tabset.tabs.length > 0) {
         t = $scope.tabset.tabs[0];
         t._active = true;
-        return prepareData(t);
+        return $scope.changeTab(t);
       }
     }, function(result) {
       return $scope.tabset.tabs = [];
@@ -2571,6 +2746,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       ref = $scope.tabset.tabs;
       for (i = 0, len = ref.length; i < len; i++) {
         veh = ref[i];
+        if (veh.Name === null) {
+          veh.Name = "No Name";
+        }
         if (veh === v) {
           veh._active = true;
         } else {
@@ -4066,6 +4244,29 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('eventGrid', [eventGrid]);
+})(angular.module('angle'));
+
+(function(module) {
+  var notificationGrid;
+  notificationGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/notification_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('notificationGrid', [notificationGrid]);
 })(angular.module('angle'));
 
 (function(module) {

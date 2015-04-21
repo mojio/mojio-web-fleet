@@ -3,9 +3,8 @@
 <div ng-controller="mymojioDashboardController" class="row">
    <tabset>
       <tab ng-repeat="vehicle in tabset.tabs" select="changeTab(vehicle)">
-         <tab-heading><i class="fa fa-car">&nbsp;</i>
-            <span ng-if="vehicle.Name!=null">{{vehicle.Name}}</span>
-            <span ng-if="vehicle.Name==null">No Name</span>
+         <tab-heading><i tooltip="{{vehicle.Name}}" class="fa fa-car">&nbsp;</i>
+            <span ng-if="tabset.tabs.length&lt;7 || vehicle._active">{{vehicle.Name}}</span>
          </tab-heading>
          <div class="row">
             <div class="col-md-3">
@@ -13,24 +12,16 @@
                   <div class="panel-heading">My Car's Health</div>
                   <div class="panel-body">
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-dashboard"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;Excellent Health</div>
+                        <div class="col-md-12"><i class="fa fa fa-dashboard"></i>&nbsp;Excellent Health</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;0 DTC Fault</div>
+                        <div class="col-md-12"><i class="fa fa fa-exclamation-triangle"></i>&nbsp;0 DTC Fault</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;27% Remaining</div>
+                        <div class="col-md-12"><i class="fa fa fa-tint"></i>&nbsp;27% Remaining</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-openid"></i>
-                        </div>
-                        <div class="col-md-10">&nbsp;135 km Range</div>
+                        <div class="col-md-12"><i class="fa fa fa-openid"></i>&nbsp;135 km Range</div>
                      </div>
                   </div>
                </div>
@@ -46,34 +37,24 @@
                   <div class="panel-heading">30 Day Report</div>
                   <div class="panel-body">
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-exchange"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Number of Trips</div>
-                        <div class="col-md-3">{{vehicle.Stat.TripsNo}}</div>
+                        <div class="col-md-7"><i class="fa fa fa-exchange"></i>&nbsp;# Trip</div>
+                        <div class="col-md-5">{{vehicle.Stat.TripsNo}}</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-openid"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Distance</div>
-                        <div class="col-md-3">{{vehicle.Stat.Distance | number:'2'}}</div>
+                        <div class="col-md-7"><i class="fa fa fa-openid"></i>&nbsp;Distance</div>
+                        <div class="col-md-5">{{vehicle.Stat.Distance | number:'2'}}</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-clock-o"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Duration</div>
-                        <div class="col-md-3">{{vehicle.Stat.Duration | hhmmss}}</div>
+                        <div class="col-md-7"><i class="fa fa fa-clock-o"></i>&nbsp;Duration</div>
+                        <div class="col-md-5">{{vehicle.Stat.Duration | hhmmss}}</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Fuel Consumed</div>
-                        <div class="col-md-3">{{vehicle.Stat.FuelCon | number:'2'}}</div>
+                        <div class="col-md-7"><i class="fa fa fa-tint"></i>&nbsp;Fuel Consumed</div>
+                        <div class="col-md-5">{{vehicle.Stat.FuelCon | number:'2'}}</div>
                      </div>
                      <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Fuel Efficiency</div>
-                        <div class="col-md-3">{{vehicle.Stat.FuelEff | number:'2'}}</div>
+                        <div class="col-md-7"><i class="fa fa fa-tint"></i>&nbsp;Fuel Efficiency</div>
+                        <div class="col-md-5">{{vehicle.Stat.FuelEff | number:'2'}}</div>
                      </div>
                   </div>
                </div>

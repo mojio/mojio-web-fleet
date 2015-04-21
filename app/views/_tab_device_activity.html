@@ -1,0 +1,53 @@
+<!--Created by pooyaparidel on 15-03-17.
+-->
+<div class="panel panel-default">
+   <div class="panel-heading">Load Data</div>
+   <div class="panel-body">
+      <div class="col-md-5">
+         <div class="input-group">
+            <span class="input-group-btn">
+               <div class="btn btn-default">From</div>
+            </span>
+            <input type="date" ng-model="DeviceActivity.From" class="form-control" />
+         </div>
+      </div>
+      <div class="col-md-5">
+         <div class="input-group">
+            <span class="input-group-btn">
+               <div class="btn btn-default">To</div>
+            </span>
+            <input type="date" ng-model="DeviceActivity.To" class="form-control" />
+         </div>
+      </div>
+      <div class="col-md-2">
+         <button ng-click="deviceActivityLoadData()" class="btn btn-default">
+            <li class="fa fa-search"></li>&nbsp; Load</button>
+      </div>
+   </div>
+</div>
+<div class="panel panel-default">
+   <div class="panel-heading">Events
+      <div ng-if="Events.length!=0" class="pull-right"><a ng-click="deviceActivityExportEvents('json')">Export</a>
+      </div>
+   </div>
+   <div class="panel-body">
+      <table class="table table-hover table-bordered table-striped table-condensed">
+         <thead>
+            <tr>
+               <th class="fieldHeader">Time</th>
+               <th class="fieldHeader">Event Type</th>
+               <th class="fieldHeader">Location</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr ng-repeat="row in Events">
+               <td>{{row.Time | date:'yy-MM-dd HH:mm:ss'}}</td>
+               <td>{{row.EventType}}</td>
+               <td>
+                  <mojio-location geoloc="row.Location"></mojio-location>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+</div>

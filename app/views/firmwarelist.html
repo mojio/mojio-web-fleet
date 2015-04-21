@@ -2,38 +2,36 @@
 <span ng-controller="mojioGridController" data-alias="FirmwareGrid" data-mojioapi="[{&quot;MojioModel&quot;:&quot;firmwares&quot;}]">
    <div class="panel panel-default">
       <div class="panel-heading"><i class="fa fa-codepen fa-fw"></i> Firmware List
-         <div ng-show="selectedRow==null" class="pull-right">
-            <div dropdown="dropdown" class="btn-group">
-               <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-primary dropdown-toggle">Fields
-                  <span class="caret"></span>
-               </button>
-               <ul role="menu" class="dropdown-menu">
-                  <li ng-repeat="x in s.f"><a ng-click="ShowHide(x.name)"><i ng-show="!x.show" class="fa fa-square-o"></i><i ng-show="x.show" class="fa fa-check-square-o"></i>{{ x.name }}</a>
-                  </li>
-               </ul>
-            </div>
-            <div dropdown="dropdown" class="btn-group">
-               <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-warning dropdown-toggle">Page Size
-                  <span class="fa fa-list"></span>
-               </button>
-               <ul role="menu" class="dropdown-menu">
-                  <li><a ng-click="changeItemsPerPage(10)"><i class="fa fa-check-square-o"></i>10</a>
-                  </li>
-                  <li><a ng-click="changeItemsPerPage(20)"><i class="fa fa-check-square-o"></i>20</a>
-                  </li>
-               </ul>
-            </div>
-            <div dropdown="dropdown" class="btn-group">
-               <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn dropdown-toggle">Export
-                  <span class="fa fa-download"></span>
-               </button>
-               <ul role="menu" class="dropdown-menu pull-right">
-                  <li><a ng-click="exportData(EXPORT_CURRENT_PAGE,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Current Page</a>
-                  </li>
-                  <li><a ng-click="exportData(EXPORT_VISITED_PAGES,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Visited Pages</a>
-                  </li>
-               </ul>
-            </div>
+         <div dropdown="dropdown" class="btn-group">
+            <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-default dropdown-toggle">Fields
+               <span class="caret"></span>
+            </button>
+            <ul role="menu" class="dropdown-menu">
+               <li ng-repeat="x in s.f"><a ng-click="ShowHide(x.name)"><i ng-show="!x.show" class="fa fa-square-o"></i><i ng-show="x.show" class="fa fa-check-square-o"></i>{{ x.name }}</a>
+               </li>
+            </ul>
+         </div>
+         <div dropdown="dropdown" class="btn-group">
+            <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-default dropdown-toggle">Page Size
+               <span class="fa fa-list"></span>
+            </button>
+            <ul role="menu" class="dropdown-menu">
+               <li><a ng-click="changeItemsPerPage(10)"><i class="fa fa-check-square-o"></i>10</a>
+               </li>
+               <li><a ng-click="changeItemsPerPage(20)"><i class="fa fa-check-square-o"></i>20</a>
+               </li>
+            </ul>
+         </div>
+         <div dropdown="dropdown" class="btn-group">
+            <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn btn-default dropdown-toggle">Export
+               <span class="fa fa-download"></span>
+            </button>
+            <ul role="menu" class="dropdown-menu pull-right">
+               <li><a ng-click="exportData(EXPORT_CURRENT_PAGE,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Current Page</a>
+               </li>
+               <li><a ng-click="exportData(EXPORT_VISITED_PAGES,EXPORT_CSV)"><i class="fa fa-check-square-o"></i>Export Visited Pages</a>
+               </li>
+            </ul>
          </div>
       </div>
       <!-- /.panel-heading-->
@@ -55,31 +53,28 @@
                         <li class="fa fa-eye"></li>
                      </a>
                   </td>
-                  <td ng-show="s.f[0].show"><a href="#" ng-click="showDetailView('app.firmwaredetail','firmwareRow',row)">{{row.Name}}</a>
+                  <td ng-show="s.f[0].show"><a href="" ng-click="showDetailView('app.firmwaredetail','firmwareRow',row)">{{row.Name}}</a>
                   </td>
                   <td ng-show="s.f[1].show">{{row.DeviceType}}</td>
                   <td ng-show="s.f[2].show">{{row.Description}}</td>
                   <td ng-show="s.f[3].show">{{row.DateModified | date:'yy-MM-dd HH:mm'}}</td>
                </tr>
             </tbody>
-            <tbody ng-show="selectedRow!=null &amp;&amp; selectedType==&quot;&quot;">
-               <tr>
-                  <td>
-                     <button type="button" href="" ng-click="selectRow(null)" class="btn">
-                        <li class="fa fa-arrow-left"></li>Close</button>
-                     <br/>
-                     <br/>
-                     <textarea style="height:300px;background-color:rgba(0, 0, 0, 0.01);border:0px" class="col-lg-12">{{selectedRow | json}}</textarea>
-                  </td>
-               </tr>
-            </tbody>
-            <tfoot>
-               <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
-                  <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
-                  </td>
-                  <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
-               </tr>
-            </tfoot>
+            <tr>
+               <td>
+                  <button type="button" href="" ng-click="detailRow(null)" class="btn">
+                     <li class="fa fa-arrow-left"></li>Close</button>
+                  <br/>
+                  <br/>
+                  <pre ng-if="rowDetail=='lite'">{{selectedRow | json}}</pre>
+                  <json-formatter ng-if="rowDetail=='advjson'" open="1" json="selectedRow"></json-formatter>
+               </td>
+            </tr>
+            <tr ng-show="selectedRow==null &amp;&amp; (displayed.length!=0 || isLoading)">
+               <td ng-show="isLoading" colspan="40"><i class="fa fa-spinner fa-spin fa-2x"></i>
+               </td>
+               <td ng-show="!isLoading" st-pagination="" st-displayed-pages="10" st-items-by-page="itemsPerPage || 10" colspan="40" class="text-center"></td>
+            </tr>
          </table>
       </div>
       <!-- /.panel-body-->
