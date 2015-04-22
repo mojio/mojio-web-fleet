@@ -2542,7 +2542,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     $scope.deviceActivityLoadData = function() {
       var criteria, mdate;
-      criteria = "Imei=" + $scope.device.Imei + ",TcuTimestamp=";
+      criteria = "Imei=" + $scope.device.Imei + ";Time=";
       mdate = new Date($scope.DeviceActivity.From);
       criteria += mdate.getFullYear() + "." + (mdate.getMonth() + 1) + "." + mdate.getDate();
       mdate = new Date($scope.DeviceActivity.To);
@@ -2554,7 +2554,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         });
         return;
       }
-      mojioRemote.GET('MojioReports', 1000, 0, criteria, 'sortby=TcuTimestamp', function(result) {
+      mojioRemote.GET('MojioReports', 1000, 0, criteria, 'sortby=ServerTimestamp', function(result) {
         return $scope.Reports = result.Data;
       }, function(result) {
         return console.log("Error");
@@ -4304,31 +4304,6 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
-  var vehicleGrid;
-  vehicleGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/vehicle_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subTrip: '=',
-        subEvent: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('vehicleGrid', [vehicleGrid]);
-})(angular.module('angle'));
-
-(function(module) {
   var userGrid;
   userGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -4351,4 +4326,29 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('userGrid', [userGrid]);
+})(angular.module('angle'));
+
+(function(module) {
+  var vehicleGrid;
+  vehicleGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/vehicle_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subTrip: '=',
+        subEvent: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('vehicleGrid', [vehicleGrid]);
 })(angular.module('angle'));
