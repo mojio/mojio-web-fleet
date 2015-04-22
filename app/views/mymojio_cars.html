@@ -3,9 +3,8 @@
 <div ng-controller="mymojioCarsController" class="row">
    <tabset>
       <tab ng-repeat="vehicle in tabset.tabs" select="changeTab(vehicle)">
-         <tab-heading><i class="fa fa-car">&nbsp;</i>
-            <span ng-if="vehicle.Name!=null">{{vehicle.Name}}</span>
-            <span ng-if="vehicle.Name==null">No Name</span>
+         <tab-heading><i tooltip="{{vehicle.Name}}" class="fa fa-car">&nbsp;</i>
+            <span ng-if="tabset.tabs.length&lt;7 || vehicle._active">{{vehicle.Name}}</span>
          </tab-heading>
          <div class="row">
             <div class="col-md-3">
@@ -26,51 +25,51 @@
             <div class="col-md-9">
                <div class="panel panel-primary">
                   <div class="panel-heading">Notifications</div>
-                  <div class="panel-body"></div>
-               </div>
-            </div>
-            <div class="col-md-3">
-               <div class="panel panel-primary">
-                  <div class="panel-heading">30 Day Report</div>
                   <div class="panel-body">
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-exchange"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Number of Trips</div>
-                        <div class="col-md-3">{{vehicle.Stat.TripsNo}}</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-openid"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Distance</div>
-                        <div class="col-md-3">{{vehicle.Stat.Distance | number:'2'}}</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-clock-o"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Duration</div>
-                        <div class="col-md-3">{{vehicle.Stat.Duration | hhmmss}}</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Fuel Consumed</div>
-                        <div class="col-md-3">{{vehicle.Stat.FuelCon | number:'2'}}</div>
-                     </div>
-                     <div class="row">
-                        <div class="col-md-2 text-center"><i class="fa fa fa-tint"></i>
-                        </div>
-                        <div class="col-md-7">&nbsp;Fuel Efficiency</div>
-                        <div class="col-md-3">{{vehicle.Stat.FuelEff | number:'2'}}</div>
-                     </div>
+                     <notification-grid broadcast="'off'" admin-mode="false" settings="false" row-detail="'off'" footer="'pagination'" api="[{'MojioModel':'Vehicles/' + vehicle._id + '/Events','defaultCriteria':'EventType=MILWarning,Accident,TowStart,LowBattery,ConnectionLost,HardAcceleration,HardBrake,LowFuel,Speed,Diagnostic','criteria':''}]"></notification-grid>
                   </div>
                </div>
             </div>
-            <div class="col-md-9">
-               <div class="panel panel-primary">
-                  <div class="panel-heading">30 Day Chart</div>
+         </div>
+         <div class="row">
+            <div class="col-md-12">
+               <div class="panel">
                   <div class="panel-body">
-                     <morris-chart style="height:300px" ng-if="vehicle.ChartData" xkey="vehicle.Chart.xkey" ykeys="vehicle.Chart.ykeys" labels="vehicle.Chart.labels" data="vehicle.ChartData" line-colors="vehicles.Chart.lineColors"></morris-chart>
+                     <div class="col-md-3">
+                        <div class="panel panel-default">
+                           <div class="panel-heading">Car's Image</div>
+                           <div class="panel-body">image</div>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="panel panel-default">
+                           <div class="panel-heading">Car's Name</div>
+                           <div class="panel-body">{{vehicle.Name}}</div>
+                        </div>
+                        <div class="panel panel-default">
+                           <div class="panel-heading">Car's Plate</div>
+                           <div class="panel-body">{{vehicle.LicensePlate}}</div>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="panel panel-default">
+                           <div class="panel-heading">Car's Info</div>
+                           <div class="panel-body">
+                              <div class="row">
+                                 <div class="col-md-12">Vehicle Identification Number (VIN)</div>
+                                 <div class="col-md-12">{{vehicle.VIN}}</div>
+                              </div>
+                              <div class="row">
+                                 <div class="col-md-4">
+                                    <div class="row">
+                                       <div class="col-md-12">Make</div>
+                                       <div class="col-md-12">{{vehicle.Info}}</div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>

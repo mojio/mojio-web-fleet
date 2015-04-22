@@ -48,7 +48,7 @@
                </tr>
             </thead>
             <tbody ng-show="selectedRow==null &amp;&amp; !isLoading">
-               <tr ng-repeat="row in displayed">
+               <tr ng-repeat="row in displayed" ng-click="showDetailView('my.eventdetail','eventRow',row)">
                   <td>
                      <a ng-if="broadcast!='off'" href="" ng-click="detailRow(row,'broadcast')">
                         <li class="fa fa-tag"></li>

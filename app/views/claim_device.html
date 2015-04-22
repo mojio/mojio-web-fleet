@@ -1,0 +1,25 @@
+<h3>Claim Device</h3>
+<span ng-controller="claimDeviceController as mc">
+   <div class="panel panel-default">
+      <div class="panel-heading">
+         <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="" data-target="#collapseOne">Claim New Device</a>
+         </h4>
+      </div>
+      <div id="collapseOne" class="panel-collapse collapse in">
+         <div class="panel-body">
+            <div class="col-md-5">
+               <div class="input-group">
+                  <span class="input-group-btn">
+                     <div class="btn btn-default">IMEI</div>
+                  </span>
+                  <input ng-model="IMEI" class="form-control" />
+               </div>
+            </div>
+            <div class="col-md-2">
+               <button ng-click="claim()" class="btn btn-default">
+                  <li class="fa fa-cubes"></li>&nbsp; Claim</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</span>

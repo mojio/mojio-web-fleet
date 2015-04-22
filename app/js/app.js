@@ -41,7 +41,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         horizontal: false,
         isFloat: false,
         asideHover: false,
-        theme: 'e'
+        theme: 'e',
+        unit: 'i'
       },
       useFullLayout: false,
       hiddenFooter: false,
@@ -52,8 +53,12 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
     yesterday.setDate((new Date()).getDate() - 1);
     todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
     yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
-    $rootScope.sidebarMenuData = [
-      {
+    $rootScope.selectedMenu = '';
+    if ($rootScope.selectedMenu === '') {
+      $rootScope.selectedMenu = 'MojioAdmin';
+    }
+    $rootScope.sidebarMenuData = {
+      'MyMojio': {
         'text': 'MyMojio',
         'sref': '',
         'icon': 'fa fa-file-o',
@@ -76,16 +81,24 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
             'icon': 'fa fa-bolt'
           }, {
             'text': 'My Account',
-            'sref': 'my.dashboard',
-            'icon': 'fa fa-user'
+            'sref': '',
+            'icon': 'fa fa-user',
+            'submenu': [
+              {
+                'text': 'Claim Device',
+                'sref': 'my.claimdevice',
+                'icon': 'fa fa-cubes'
+              }
+            ]
           }, {
             'text': 'Support',
             'sref': 'my.dashboard',
             'icon': 'fa fa-question-circle'
           }
         ]
-      }, {
-        'text': 'FleetLeed',
+      },
+      'Fleet': {
+        'text': 'Fleet',
         'sref': '',
         'icon': 'fa fa-file-o',
         'submenu': [
@@ -130,7 +143,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
             ]
           }
         ]
-      }, {
+      },
+      'MojioAdmin': {
         'text': 'Mojio Admin',
         'sref': '',
         'icon': 'fa fa-file-o',
@@ -208,12 +222,14 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
             ]
           }
         ]
-      }, {
+      },
+      'Developer': {
         'text': 'Developer',
         'sref': '',
         'icon': 'fa fa-file-o',
         'submenu': []
-      }, {
+      },
+      'MojioIDE': {
         'text': 'Mojio IDE',
         'sref': '',
         'icon': 'fa fa-fire',
@@ -234,7 +250,7 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
           }
         ]
       }
-    ];
+    };
     $rootScope.user = {
       name: '',
       job: 'Admin',
@@ -335,6 +351,14 @@ App.config([
       url: '/notifications',
       title: 'My Notifications',
       templateUrl: helper.basepath('notification_list.html')
+    }).state('my.eventdetail', {
+      url: '/eventdetail',
+      title: 'Notification Detail',
+      templateUrl: helper.basepath('event_detail.html')
+    }).state('my.claimdevice', {
+      url: '/claimdevice',
+      title: 'Claim Device',
+      templateUrl: helper.basepath('claim_device.html')
     });
   }
 ]).config([
@@ -460,10 +484,14 @@ App.controller('AppController', [
       console.log('user click');
       return $scope.$broadcast('toggleUserBlock');
     });
-    $scope.userLogout = (function() {
+    $scope.userLogout = function() {
       console.log('user Logout');
       return mojioGlobal.logout();
-    });
+    };
+    $scope.changeUnit = function(u) {
+      console.log('unit changed');
+      return $rootScope.app.layout.unit = u;
+    };
     $scope.colorByName = colors.byName;
     $scope.language = {
       listIsOpen: false,
@@ -820,7 +848,7 @@ App.controller('AppController', [
 App.controller('SidebarController', [
   '$rootScope', '$scope', '$state', '$http', '$timeout', 'Utils', function($rootScope, $scope, $state, $http, $timeout, Utils) {
     var closeAllBut, collapseList, isActive, isChild, sidebarMenuData;
-    sidebarMenuData = $rootScope.sidebarMenuData;
+    sidebarMenuData = $rootScope.sidebarMenuData[$rootScope.selectedMenu].submenu;
     collapseList = [];
     closeAllBut = function(index) {
       var i;
@@ -976,7 +1004,9 @@ App.directive('loadCss', ["$rootScope", function($rootScope) {
         uri = attrs.loadCss;
         theme = attrs.theme;
         if (theme) {
-          $rootScope.app.layout.theme = theme;
+          $rootScope.$apply(function() {
+            return $rootScope.app.layout.theme = theme;
+          });
         }
         link = void 0;
         if (uri) {
@@ -2034,6 +2064,29 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
+  var claimDeviceController;
+  claimDeviceController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    $scope.IMEI = "";
+    $scope.claim = function() {
+      var data;
+      data = {};
+      return mojioRemote.PUT("Mojios/" + $scope.IMEI + "/User", data, function(result) {
+        return toaster.success({
+          title: "Claim Device",
+          body: "Device Claimed Successfully"
+        });
+      }, function() {
+        return toaster.error({
+          title: "Claim Device",
+          body: "Claim was unsuccessful"
+        });
+      });
+    };
+  };
+  module.controller('claimDeviceController', claimDeviceController);
+})(angular.module('angle'));
+
+(function(module) {
   var configDetailController;
   configDetailController = function($rootScope, $stateParams) {
     this.configRow = $rootScope.configRow;
@@ -2523,6 +2576,15 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
+  var eventDetailController;
+  eventDetailController = function($scope, $rootScope, $stateParams) {
+    console.log($rootScope.eventRow);
+    $scope.Event = $rootScope.eventRow;
+  };
+  module.controller('eventDetailController', eventDetailController);
+})(angular.module('angle'));
+
+(function(module) {
   var firmwareDetailController;
   firmwareDetailController = function($scope, $rootScope, $stateParams) {
     $scope.firmwareRow = $rootScope.firmwareRow;
@@ -2624,7 +2686,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       if ($scope.tabset.tabs.length > 0) {
         t = $scope.tabset.tabs[0];
         t._active = true;
-        return prepareData(t);
+        return $scope.changeTab(t);
       }
     }, function(result) {
       return $scope.tabset.tabs = [];
@@ -2634,6 +2696,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       ref = $scope.tabset.tabs;
       for (i = 0, len = ref.length; i < len; i++) {
         veh = ref[i];
+        if (veh.Name === null) {
+          veh.Name = "No Name";
+        }
         if (veh === v) {
           veh._active = true;
         } else {
@@ -2643,79 +2708,11 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       }
     };
     return prepareData = function(v) {
-      var next, nextString, past, pastString, today, todayString;
       if (v.ready) {
         return;
       }
-      today = new Date();
-      past = new Date();
-      past.setDate((new Date()).getDate() - 30);
-      next = new Date();
-      next.setDate((new Date()).getDate() + 1);
-      todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
-      pastString = past.getFullYear() + "." + (past.getMonth() + 1) + "." + past.getDate();
-      nextString = next.getFullYear() + "." + (next.getMonth() + 1) + "." + next.getDate();
-      mojioRemote.GET("Vehicles/" + v._id + "/Trips", 10000, 0, "StartTime=" + pastString + "-" + nextString, null, function(result) {
-        var Distance, Duration, FuelCon, FuelEff, LastDate, NewDate, TripsNo, chartData, ipos, r;
-        chartData = [];
-        FuelCon = 0;
-        FuelEff = 0;
-        Distance = 0;
-        LastDate = "";
-        NewDate = "";
-        r = result.Data;
-        ipos = 0;
-        while (ipos < r.length) {
-          NewDate = new Date(r[ipos].StartTime);
-          NewDate = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
-          if (NewDate !== LastDate) {
-            if (LastDate !== "" && FuelCon !== 0) {
-              chartData.push({
-                y: LastDate,
-                a: FuelCon,
-                b: Distance / FuelCon
-              });
-            }
-            FuelCon = 0;
-            Distance = 0;
-            LastDate = NewDate;
-          }
-          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
-            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
-            Distance += r[ipos].Distance;
-          }
-          ipos++;
-        }
-        v.ChartData = chartData;
-        v.Chart = {
-          xkey: 'y',
-          ykeys: ['a', 'b'],
-          labels: ['a', 'b'],
-          lineColors: ['#36B249', '#36B249']
-        };
-        FuelCon = 0;
-        FuelEff = 0;
-        Distance = 0;
-        TripsNo = 0;
-        Duration = 0;
-        ipos = 0;
-        while (ipos < r.length) {
-          TripsNo++;
-          Duration += ((new Date(r[ipos].EndTime)) - (new Date(r[ipos].StartTime))) / 1000;
-          if (r[ipos].Distance > 0.1 && r[ipos].FuelEfficiency > 1) {
-            FuelCon += r[ipos].Distance / r[ipos].FuelEfficiency;
-            Distance += r[ipos].Distance;
-            FuelEff = Distance / FuelCon;
-          }
-          ipos++;
-        }
-        v.Stat = {
-          TripsNo: TripsNo,
-          FuelCon: FuelCon,
-          FuelEff: FuelEff,
-          Distance: Distance,
-          Duration: Duration
-        };
+      mojioRemote.GET("Vins/" + v.VIN, null, null, null, null, function(result) {
+        console.log(result);
         return v.ready = true;
       });
     };
@@ -3383,6 +3380,66 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
+  var widgetDetailEvent;
+  widgetDetailEvent = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_detail_event.html',
+      controller: function($rootScope, $scope, mojioRemote) {
+        $scope.reset = function() {
+          return $scope.rel = {
+            users: [],
+            loadUsers: false,
+            trips: [],
+            moreTrips: false,
+            loadTrips: false,
+            events: [],
+            moreEvents: false,
+            loadEvents: false
+          };
+        };
+        $scope.reset();
+        $rootScope.$on('MojioObjectSelected', function(event, data) {
+          if (data.Type === "Trip") {
+            return $scope.reset();
+          }
+        });
+        $scope.broadcast = function(data) {
+          $rootScope.$broadcast('MojioObjectSelected', data);
+        };
+        $scope.showVehicle = function() {
+          mojioRemote.GET("Vehicles/" + $scope.data.VehicleId, null, null, null, null, function(result) {
+            return $rootScope.$broadcast('MojioObjectSelected', result);
+          });
+        };
+        $scope.showDevice = function() {
+          mojioRemote.GET("Mojios/" + $scope.data.MojioId, null, null, null, null, function(result) {
+            return $rootScope.$broadcast('MojioObjectSelected', result);
+          });
+        };
+        $scope.showRecentEvents = function() {
+          $scope.rel.loadEvents = true;
+          $scope.rel.moreEvents = false;
+          mojioRemote.GET("Trips/" + $scope.data._id + "/Events", 10, $scope.rel.events.length, null, "sortBy=Time&desc=true", function(result) {
+            $scope.rel.events = $scope.rel.events.concat(result.Data);
+            $scope.rel.loadEvents = false;
+            if (result.TotalRows > $scope.rel.events.length) {
+              return $scope.rel.moreEvents = true;
+            } else {
+              return $scope.rel.moreEvents = false;
+            }
+          });
+        };
+      },
+      link: function($rootScope, $scope, element, attrs) {
+        $scope.data = attrs.data;
+      }
+    };
+  };
+  return module.directive('widgetDetailEvent', [widgetDetailEvent]);
+})(angular.module('angle'));
+
+(function(module) {
   var widgetDetailDevice;
   widgetDetailDevice = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -3451,66 +3508,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('widgetDetailDevice', [widgetDetailDevice]);
-})(angular.module('angle'));
-
-(function(module) {
-  var widgetDetailEvent;
-  widgetDetailEvent = function($scope, $rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/widget_detail_event.html',
-      controller: function($rootScope, $scope, mojioRemote) {
-        $scope.reset = function() {
-          return $scope.rel = {
-            users: [],
-            loadUsers: false,
-            trips: [],
-            moreTrips: false,
-            loadTrips: false,
-            events: [],
-            moreEvents: false,
-            loadEvents: false
-          };
-        };
-        $scope.reset();
-        $rootScope.$on('MojioObjectSelected', function(event, data) {
-          if (data.Type === "Trip") {
-            return $scope.reset();
-          }
-        });
-        $scope.broadcast = function(data) {
-          $rootScope.$broadcast('MojioObjectSelected', data);
-        };
-        $scope.showVehicle = function() {
-          mojioRemote.GET("Vehicles/" + $scope.data.VehicleId, null, null, null, null, function(result) {
-            return $rootScope.$broadcast('MojioObjectSelected', result);
-          });
-        };
-        $scope.showDevice = function() {
-          mojioRemote.GET("Mojios/" + $scope.data.MojioId, null, null, null, null, function(result) {
-            return $rootScope.$broadcast('MojioObjectSelected', result);
-          });
-        };
-        $scope.showRecentEvents = function() {
-          $scope.rel.loadEvents = true;
-          $scope.rel.moreEvents = false;
-          mojioRemote.GET("Trips/" + $scope.data._id + "/Events", 10, $scope.rel.events.length, null, "sortBy=Time&desc=true", function(result) {
-            $scope.rel.events = $scope.rel.events.concat(result.Data);
-            $scope.rel.loadEvents = false;
-            if (result.TotalRows > $scope.rel.events.length) {
-              return $scope.rel.moreEvents = true;
-            } else {
-              return $scope.rel.moreEvents = false;
-            }
-          });
-        };
-      },
-      link: function($rootScope, $scope, element, attrs) {
-        $scope.data = attrs.data;
-      }
-    };
-  };
-  return module.directive('widgetDetailEvent', [widgetDetailEvent]);
 })(angular.module('angle'));
 
 (function(module) {

@@ -28,14 +28,14 @@
          </li>
          <li>
             <!-- Button used to collapse the left sidebar. Only visible on tablet and desktops-->
-            <a href="" ng-click="toggleUserBlock()">
+            <a ng-click="toggleUserBlock()">
                <em class="fa fa-user"></em>
             </a>
          </li>
          <!-- END User avatar toggle-->
          <!-- START lock screen-->
          <li>
-            <a href="" ng-click="userLogout()">
+            <a ng-click="userLogout()">
                <em class="fa fa-sign-out"></em>
             </a>
          </li>
@@ -51,6 +51,47 @@
             </a>
          </li>
          <!-- START Offsidebar button-->
+         <li dropdown="dropdown" class="dropdown dropdown-list">
+            <a dropdown-toggle="dropdown-toggle">
+               <em class="fa fa-globe"></em>
+            </a>
+            <ul role="menu" class="dropdown-menu animated flipInY">
+               <li>
+                  <!-- START list group-->
+                  <div class="list-group">
+                     <!-- list item-->
+                     <a href="#" ng-click="changeUnit('i')" class="list-group-item">
+                        <div class="media-box">
+                           <div class="pull-left">
+                              <em ng-class="{'fa-check-square-o':$root.app.layout.unit=='i','fa-square-o':$root.app.layout.unit!='i'}" class="fa"></em>
+                           </div>
+                           <div class="media-box-body clearfix">
+                              <p class="m0">Imperial</p>
+                              <p class="m0 text-muted">
+                                 <small>mile and gallon ...</small>
+                              </p>
+                           </div>
+                        </div>
+                     </a>
+                     <!-- list item-->
+                     <a href="#" ng-click="changeUnit('m')" class="list-group-item">
+                        <div class="media-box">
+                           <div class="pull-left">
+                              <em ng-class="{'fa-check-square-o':$root.app.layout.unit=='m','fa-square-o':$root.app.layout.unit!='m'}" class="fa"></em>
+                           </div>
+                           <div class="media-box-body clearfix">
+                              <p class="m0">Metric</p>
+                              <p class="m0 text-muted">
+                                 <small>meter and liter ...</small>
+                              </p>
+                           </div>
+                        </div>
+                     </a>
+                  </div>
+               </li>
+            </ul>
+         </li>
+         <!-- END Offsidebar menu-->
          <li>
             <a toggle-state="offsidebar-open" no-persist="no-persist">
                <em class="fa fa-sliders"></em>
