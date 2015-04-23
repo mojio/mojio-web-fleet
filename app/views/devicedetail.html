@@ -247,7 +247,7 @@
                         <span class="input-group-btn">
                            <div class="btn btn-default">From</div>
                         </span>
-                        <input type="date" ng-model="DeviceActivity.From" class="form-control" />
+                        <input type="text" ng-model="DeviceActivity.From" datepicker-popup="yyyy.MM.dd" is-open="DeviceActivityFromOpened" ng-click="DeviceActivityFromOpened=true" ng-required="true" close-text="" class="form-control" />
                      </div>
                   </div>
                   <div class="col-md-5">
@@ -255,7 +255,7 @@
                         <span class="input-group-btn">
                            <div class="btn btn-default">To</div>
                         </span>
-                        <input type="date" ng-model="DeviceActivity.To" class="form-control" />
+                        <input type="text" ng-model="DeviceActivity.To" datepicker-popup="yyyy.MM.dd" is-open="DeviceActivityToOpened" ng-click="DeviceActivityToOpened=true" ng-required="true" close-text="" class="form-control" />
                      </div>
                   </div>
                   <div class="col-md-2">

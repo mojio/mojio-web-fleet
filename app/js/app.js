@@ -20,6 +20,11 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
     $rootScope.$storage = $window.localStorage;
+    $rootScope.user = {
+      name: '',
+      job: 'Admin',
+      picture: 'app/img/user/02.jpg'
+    };
     mojioGlobal.checkAccess();
 
     /*$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
@@ -73,12 +78,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
             'icon': 'fa fa-car'
           }, {
             'text': 'My Trips',
-            'sref': 'my.dashboard',
+            'sref': 'my.trips',
             'icon': 'fa fa-openid'
-          }, {
-            'text': 'Notification List',
-            'sref': 'my.notifications',
-            'icon': 'fa fa-bolt'
           }, {
             'text': 'My Account',
             'sref': '',
@@ -251,11 +252,6 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         ]
       }
     };
-    $rootScope.user = {
-      name: '',
-      job: 'Admin',
-      picture: 'app/img/user/02.jpg'
-    };
   }
 ]);
 
@@ -344,13 +340,13 @@ App.config([
       title: 'MyMojio Dashboard',
       templateUrl: helper.basepath('mymojio_dashboard.html')
     }).state('my.cars', {
-      url: '/mymojicars',
+      url: '/mymojiocars',
       title: 'My Cars',
       templateUrl: helper.basepath('mymojio_cars.html')
-    }).state('my.notifications', {
-      url: '/notifications',
-      title: 'My Notifications',
-      templateUrl: helper.basepath('notification_list.html')
+    }).state('my.trips', {
+      url: '/mymojiotrips',
+      title: 'My Trips',
+      templateUrl: helper.basepath('mymojio_trips.html')
     }).state('my.eventdetail', {
       url: '/eventdetail',
       title: 'Notification Detail',
@@ -481,15 +477,12 @@ App.controller('AppController', [
       $localStorage.layout = $scope.app.layout;
     }), true);
     $scope.toggleUserBlock = (function() {
-      console.log('user click');
       return $scope.$broadcast('toggleUserBlock');
     });
     $scope.userLogout = function() {
-      console.log('user Logout');
       return mojioGlobal.logout();
     };
     $scope.changeUnit = function(u) {
-      console.log('unit changed');
       return $rootScope.app.layout.unit = u;
     };
     $scope.colorByName = colors.byName;
@@ -1527,7 +1520,7 @@ App.factory('colors', [
 
 (function(common) {
   var mojioGlobal;
-  mojioGlobal = function($http, localStorage) {
+  mojioGlobal = function($http, localStorage, $rootScope) {
     var GoToOAuth, TOKENKEY, USERKEY, apiUrl, changeProducationMode, checkAccess, createMojioForSignal, data, logout;
     TOKENKEY = 'ACCESS_TOKEN_KEY';
     USERKEY = 'USER_DATA_KEY';
@@ -1605,6 +1598,7 @@ App.factory('colors', [
           access_token = window.location.toString().split('#')[1].split('&')[0].split('=')[1];
           if (access_token) {
             data.access_token = access_token;
+            localStorage.add(TOKENKEY, data.access_token);
           }
         } catch (_error) {
           e = _error;
@@ -1618,7 +1612,7 @@ App.factory('colors', [
       }
       if (data.access_token.length === 0) {
         GoToOAuth();
-      } else {
+      } else if (data.user_data === null) {
         config = {
           headers: {
             'Content-Type': 'application/json',
@@ -1626,15 +1620,26 @@ App.factory('colors', [
           }
         };
         $http.get(apiUrl() + 'Users/Me', config).success(function(response) {
+          var title;
+          console.log(response);
+          title = response.UserName;
+          if (response.FirstName !== null) {
+            title = response.FirstName;
+            if (response.LastName !== null) {
+              title += " " + response.LastName;
+            }
+          }
           data.user_data = {
             id: response._id,
-            title: response.FirstName + ' ' + response.LastName
+            title: title
           };
-          localStorage.add(TOKENKEY, data.access_token);
+          $rootScope.user.name = data.user_data.title;
           localStorage.add(USERKEY, data.user_data);
         }).error(function(response) {
           return GoToOAuth();
         });
+      } else {
+        $rootScope.user.name = data.user_data.title;
       }
     };
     return {
@@ -2613,38 +2618,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
-  var importDevicesController;
-  importDevicesController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    $scope.data = {
-      Description: '',
-      Name: '',
-      deviceList: ''
-    };
-    $scope.importData = function() {
-      var data;
-      data = {
-        Description: $scope.data,
-        Name: $scope.data.Name,
-        RequestData: $scope.data.deviceList.split('\r'),
-        Type: 'Operation'
-      };
-      return mojioRemote.POST("mojios/mojioinventory", data, function(result) {
-        return toaster.success({
-          title: "Import Device",
-          body: "Import Device Successfully"
-        });
-      }, function() {
-        return toaster.error({
-          title: "Import Device",
-          body: "Error Importing Device"
-        });
-      });
-    };
-  };
-  module.controller('importDevicesController', importDevicesController);
-})(angular.module('angle'));
-
-(function(module) {
   var importSimsController;
   importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     $scope.data = {
@@ -2682,6 +2655,38 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('importSimsController', importSimsController);
+})(angular.module('angle'));
+
+(function(module) {
+  var importDevicesController;
+  importDevicesController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    $scope.data = {
+      Description: '',
+      Name: '',
+      deviceList: ''
+    };
+    $scope.importData = function() {
+      var data;
+      data = {
+        Description: $scope.data,
+        Name: $scope.data.Name,
+        RequestData: $scope.data.deviceList.split('\r'),
+        Type: 'Operation'
+      };
+      return mojioRemote.POST("mojios/mojioinventory", data, function(result) {
+        return toaster.success({
+          title: "Import Device",
+          body: "Import Device Successfully"
+        });
+      }, function() {
+        return toaster.error({
+          title: "Import Device",
+          body: "Error Importing Device"
+        });
+      });
+    };
+  };
+  module.controller('importDevicesController', importDevicesController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -2846,6 +2851,55 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('mymojioDashboardController', mymojioDashboardController);
+})(angular.module('angle'));
+
+(function(module) {
+  var mymojioTripsController;
+  mymojioTripsController = function($rootScope, $stateParams, $scope, mojioRemote) {
+    var prepareData;
+    $scope.tabset = {
+      tabs: []
+    };
+    mojioRemote.GET('vehicles', 10, 0, "Mazda 3", null, function(result) {
+      var t;
+      $scope.tabset.tabs = angular.copy(result.Data);
+      if ($scope.tabset.tabs.length > 0) {
+        t = $scope.tabset.tabs[0];
+        t._active = true;
+        return t.Info = {};
+      }
+    }, function(result) {
+      return $scope.tabset.tabs = [];
+    });
+    $scope.changeTab = function(v) {
+      var i, len, ref, veh;
+      ref = $scope.tabset.tabs;
+      for (i = 0, len = ref.length; i < len; i++) {
+        veh = ref[i];
+        if (veh.Name === null) {
+          veh.Name = "No Name";
+        }
+        if (veh === v) {
+          veh._active = true;
+        } else {
+          veh._active = false;
+        }
+        prepareData(v);
+      }
+    };
+    return prepareData = function(v) {
+      if (v.ready) {
+        return;
+      }
+      if (v.VIN !== null) {
+        mojioRemote.GET("Vins/" + v.VIN, null, null, null, null, function(result) {
+          v.Info = result;
+          return v.ready = true;
+        });
+      }
+    };
+  };
+  module.controller('mymojioTripsController', mymojioTripsController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -4210,6 +4264,29 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
+  var eventGrid;
+  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/event_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('eventGrid', [eventGrid]);
+})(angular.module('angle'));
+
+(function(module) {
   var deviceGrid;
   deviceGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -4231,29 +4308,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('deviceGrid', [deviceGrid]);
-})(angular.module('angle'));
-
-(function(module) {
-  var eventGrid;
-  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/event_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('eventGrid', [eventGrid]);
 })(angular.module('angle'));
 
 (function(module) {
