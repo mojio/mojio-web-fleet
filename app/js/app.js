@@ -60,7 +60,7 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
     yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
     $rootScope.selectedMenu = '';
     if ($rootScope.selectedMenu === '') {
-      $rootScope.selectedMenu = 'Developer';
+      $rootScope.selectedMenu = 'MyMojio';
     }
     $rootScope.sidebarMenuData = {
       'MyMojio': {
@@ -1615,6 +1615,11 @@ App.factory('colors', [
           url: 'https://api.moj.io/v1/',
           login: 'https://api.moj.io/OAuth2/authorize',
           logout: 'https://api.moj.io/account/logout'
+        }, {
+          hostname: 'api.moj.io',
+          url: 'https://staging.moj.io/v1/',
+          login: 'https://api.moj.io/OAuth2/authorize',
+          logout: 'https://api.moj.io/account/logout'
         }
       ],
       accessChecked: false
@@ -2737,7 +2742,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 
 (function(module) {
   var manageAppsController;
-  manageAppsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+  manageAppsController = function($scope, $rootScope, $stateParams, $state, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     $scope.fieldDesc = [
       {
         FieldName: 'Name',
@@ -2751,6 +2756,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       }
     ];
     $scope.NewApp = {
+      Type: "App",
       Name: "",
       Description: "",
       ApplicationType: "Web",
@@ -2762,6 +2768,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     $scope.Data = {};
     $scope.deleteMojio = function(row) {
+      alert(1);
       $scope.$$childHead.newSearch(0);
     };
     $scope.editMojio = function(row) {
@@ -2783,8 +2790,11 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         });
       });
     };
-    return;
-    return $scope.showAppIDE = function() {};
+    return $scope.showAppIDE = function(row) {
+      $state.go("dev.appide", {
+        id: row._id
+      });
+    };
   };
   module.controller('manageAppsController', manageAppsController);
 })(angular.module('angle'));
@@ -2818,6 +2828,55 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('manageDeviceController', manageDeviceController);
+})(angular.module('angle'));
+
+(function(module) {
+  var mymojioCarsController;
+  mymojioCarsController = function($rootScope, $stateParams, $scope, mojioRemote) {
+    var prepareData;
+    $scope.tabset = {
+      tabs: []
+    };
+    mojioRemote.GET('vehicles', 10, 0, "Mazda 3", null, function(result) {
+      var t;
+      $scope.tabset.tabs = angular.copy(result.Data);
+      if ($scope.tabset.tabs.length > 0) {
+        t = $scope.tabset.tabs[0];
+        t._active = true;
+        return t.Info = {};
+      }
+    }, function(result) {
+      return $scope.tabset.tabs = [];
+    });
+    $scope.changeTab = function(v) {
+      var i, len, ref, veh;
+      ref = $scope.tabset.tabs;
+      for (i = 0, len = ref.length; i < len; i++) {
+        veh = ref[i];
+        if (veh.Name === null) {
+          veh.Name = "No Name";
+        }
+        if (veh === v) {
+          veh._active = true;
+        } else {
+          veh._active = false;
+        }
+        prepareData(v);
+      }
+    };
+    return prepareData = function(v) {
+      if (v.ready) {
+        return;
+      }
+      if (v.VIN !== null) {
+        mojioRemote.GET("Vins/" + v.VIN, null, null, null, null, function(result) {
+          v.Info = result;
+          return v.ready = true;
+        });
+      }
+    };
+  };
+  module.controller('mymojioCarsController', mymojioCarsController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -2933,55 +2992,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('mymojioDashboardController', mymojioDashboardController);
-})(angular.module('angle'));
-
-(function(module) {
-  var mymojioCarsController;
-  mymojioCarsController = function($rootScope, $stateParams, $scope, mojioRemote) {
-    var prepareData;
-    $scope.tabset = {
-      tabs: []
-    };
-    mojioRemote.GET('vehicles', 10, 0, "Mazda 3", null, function(result) {
-      var t;
-      $scope.tabset.tabs = angular.copy(result.Data);
-      if ($scope.tabset.tabs.length > 0) {
-        t = $scope.tabset.tabs[0];
-        t._active = true;
-        return t.Info = {};
-      }
-    }, function(result) {
-      return $scope.tabset.tabs = [];
-    });
-    $scope.changeTab = function(v) {
-      var i, len, ref, veh;
-      ref = $scope.tabset.tabs;
-      for (i = 0, len = ref.length; i < len; i++) {
-        veh = ref[i];
-        if (veh.Name === null) {
-          veh.Name = "No Name";
-        }
-        if (veh === v) {
-          veh._active = true;
-        } else {
-          veh._active = false;
-        }
-        prepareData(v);
-      }
-    };
-    return prepareData = function(v) {
-      if (v.ready) {
-        return;
-      }
-      if (v.VIN !== null) {
-        mojioRemote.GET("Vins/" + v.VIN, null, null, null, null, function(result) {
-          v.Info = result;
-          return v.ready = true;
-        });
-      }
-    };
-  };
-  module.controller('mymojioCarsController', mymojioCarsController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -3133,7 +3143,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-vehicle-report',
         Title: 'Vehicles Report',
@@ -3152,7 +3163,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-vehicles-on-map',
         Title: 'Vehicles On Map',
@@ -3171,7 +3183,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-vehicles-on-streetview',
         Title: 'Vehicle Streetview',
@@ -3190,7 +3203,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-vehicles-text-direction',
         Title: 'Direction to My Vehicle',
@@ -3209,7 +3223,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-trip-list',
         Title: 'Trips List',
@@ -3228,7 +3243,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-mojio-list',
         Title: 'Mojios List',
@@ -3247,7 +3263,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-user-list',
         Title: 'Friends List',
@@ -3266,7 +3283,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-detail-info',
         Title: 'Detail Info',
@@ -3285,7 +3303,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
       }, {
         Portlet: 'widget-json',
         Title: 'JSON View',
@@ -3304,7 +3323,65 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           minCol: 3,
           maxCol: 12
         },
-        Edit: false
+        Edit: false,
+        Data: []
+      }, {
+        Portlet: 'widget-cms-embed',
+        Title: 'Content Window (Embed Version)',
+        Desc: 'Show Content to Visitors',
+        Icon: 'fa-align-left',
+        Col: 6,
+        Row: 6,
+        Footer: '',
+        Style: 'panel-primary',
+        Resizable: {
+          overall: true,
+          col: true,
+          row: true,
+          minRow: 3,
+          maxRow: 10,
+          minCol: 3,
+          maxCol: 12
+        },
+        Edit: false,
+        Data: {
+          Content: {
+            Type: 'html',
+            Title: 'Content',
+            Data: 'Lorem ipsum dolor sit amet'
+          }
+        }
+      }, {
+        Portlet: 'widget-cms-github-menu',
+        Title: 'Content Treeview (Github)',
+        Desc: 'Show Content list as Treeview',
+        Icon: 'fa-align-left',
+        Col: 6,
+        Row: 6,
+        Footer: '',
+        Style: 'panel-primary',
+        Resizable: {
+          overall: true,
+          col: true,
+          row: true,
+          minRow: 3,
+          maxRow: 10,
+          minCol: 3,
+          maxCol: 12
+        },
+        Edit: false,
+        Data: {
+          url: {
+            Type: 'text',
+            Title: 'Content List Url',
+            Data: 'app/cms/menu.js'
+          },
+          github: {
+            Type: 'text',
+            Title: 'Address of the page on GitHub',
+            Data: 'https://github.com/mojio/mojio-web-fleet/edit/master/'
+          }
+        }
       }
     ];
     tohash = function(s) {
@@ -3361,7 +3438,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     $scope.portletDirective = function(portlet, pid) {
       var el;
-      el = $sce.trustAsHtml("'<div " + portlet + " portlet=\"" + pid + "\"></div>'");
+      el = $sce.trustAsHtml("'<div " + portlet + " data=\"v.Data\" portlet=\"" + pid + "\"></div>'");
       return el;
     };
     $scope.savePortalState = function() {
@@ -3490,6 +3567,68 @@ angular.module('angle').filter('timeago', function() {
     return ago(new Date(idate));
   };
 });
+
+(function(module) {
+  var widgetCmsEmbed;
+  widgetCmsEmbed = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_cms_embed.html',
+      scope: {
+        data: '='
+      },
+      controller: function($rootScope, $scope) {
+        console.log($scope);
+      },
+      link: function($rootScope, scope, element, attrs) {}
+    };
+  };
+  return module.directive('widgetCmsEmbed', [widgetCmsEmbed]);
+})(angular.module('angle'));
+
+(function(module) {
+  var widgetCmsGithubMenu;
+  widgetCmsGithubMenu = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster, $http) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_cms_github_menu.html',
+      scope: {
+        data: '='
+      },
+      controller: function($rootScope, $scope, $http) {
+        $http.get($scope.data.url.Data).success(function(response) {
+          console.log(response);
+          return $scope.node = response;
+        });
+        $scope.FileTitle = function(node) {
+          var title;
+          title = node.name;
+          if (title.indexOf('_') !== -1) {
+            title = title.substring(title.indexOf('_') + 1).replace(/_/g, ' ');
+          }
+          if (node.type !== 'folder') {
+            title = title.substring(0, title.length - 5);
+          }
+          return title;
+        };
+        $scope.ViewMode = "toc";
+        $scope.NodeClick = function(node) {
+          $scope.ViewMode = "html";
+          $scope.Title = $scope.FileTitle(node);
+          $scope.GitHubUrl = $scope.data.github.Data + node.path + "/" + node.name;
+          $http.get(node.path + "/" + node.name).success(function(response) {
+            return $scope.Content = response;
+          });
+        };
+        $scope.ShowTOC = function() {
+          return $scope.ViewMode = "toc";
+        };
+      },
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('widgetCmsGithubMenu', [widgetCmsGithubMenu]);
+})(angular.module('angle'));
 
 (function(module) {
   var widgetDetailApp;
@@ -3963,6 +4102,24 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
+  var widgetJson;
+  widgetJson = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/widget_json.html',
+      controller: function($rootScope, $scope) {
+        $scope.data = null;
+        $rootScope.$on('MojioObjectSelected', function(event, data) {
+          return $scope.data = data;
+        });
+      },
+      link: function($rootScope, scope, element, attrs) {}
+    };
+  };
+  return module.directive('widgetJson', [widgetJson]);
+})(angular.module('angle'));
+
+(function(module) {
   var widgetMojioList;
   widgetMojioList = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -3986,24 +4143,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('widgetTripList', [widgetTripList]);
-})(angular.module('angle'));
-
-(function(module) {
-  var widgetJson;
-  widgetJson = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/widget_json.html',
-      controller: function($rootScope, $scope) {
-        $scope.data = null;
-        $rootScope.$on('MojioObjectSelected', function(event, data) {
-          return $scope.data = data;
-        });
-      },
-      link: function($rootScope, scope, element, attrs) {}
-    };
-  };
-  return module.directive('widgetJson', [widgetJson]);
 })(angular.module('angle'));
 
 (function(module) {
@@ -4100,6 +4239,132 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('widgetVehicleReport', [widgetVehicleReport]);
+})(angular.module('angle'));
+
+(function(module) {
+  var widgetVehiclesOnMap;
+  widgetVehiclesOnMap = function($window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    var showDirection, showLocation, state;
+    showDirection = function(model) {
+      mojioRemote.GET(model, 10000, 0, "", "sortBy=Time", function(result) {
+        var AllCoordinates, bounds, d, data, i, len, maker, marker, myOptions, tripPath;
+        data = result.Data;
+        myOptions = {
+          navigationControlOptions: {
+            style: google.maps.NavigationControlStyle.SMALL
+          },
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        maker = null;
+        state.map = new google.maps.Map(state.element, myOptions);
+        bounds = new google.maps.LatLngBounds();
+        AllCoordinates = [];
+        for (i = 0, len = data.length; i < len; i++) {
+          d = data[i];
+          marker = new google.maps.Marker({
+            position: new google.maps.LatLng(d.Location.Lat, d.Location.Lng),
+            map: state.map,
+            title: d.Name
+          });
+          AllCoordinates.push(new google.maps.LatLng(d.Location.Lat, d.Location.Lng));
+          bounds.extend(marker.getPosition());
+        }
+        state.map.fitBounds(bounds);
+        tripPath = new google.maps.Polyline({
+          path: AllCoordinates,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        return tripPath.setMap(state.map);
+      }, function(result) {
+        return elm.innerHTML = "?";
+      });
+    };
+    showLocation = function(model) {
+      mojioRemote.GET(model, 100, 0, "", "sortBy=LastContactTime&desc=true", function(result) {
+        var bounds, d, data, extendPoint1, extendPoint2, i, len, maker, marker, myOptions;
+        data = result.Data;
+        myOptions = {
+          navigationControlOptions: {
+            style: google.maps.NavigationControlStyle.SMALL
+          },
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        maker = null;
+        state.map = new google.maps.Map(state.element, myOptions);
+        bounds = new google.maps.LatLngBounds();
+        for (i = 0, len = data.length; i < len; i++) {
+          d = data[i];
+          marker = new google.maps.Marker({
+            position: new google.maps.LatLng(d.LastLocation.Lat, d.LastLocation.Lng),
+            map: state.map,
+            title: d.Name
+          });
+          bounds.extend(marker.getPosition());
+        }
+        if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+          extendPoint1 = new google.maps.LatLng(bounds.getNorthEast().lat() + 0.003, bounds.getNorthEast().lng() + 0.003);
+          extendPoint2 = new google.maps.LatLng(bounds.getNorthEast().lat() - 0.003, bounds.getNorthEast().lng() - 0.003);
+          bounds.extend(extendPoint1);
+          bounds.extend(extendPoint2);
+        }
+        return state.map.fitBounds(bounds);
+      }, function(result) {
+        return elm.innerHTML = "?";
+      });
+    };
+    state = {
+      map: null,
+      element: null,
+      attrs: null
+    };
+    return {
+      restrict: 'EA',
+      controller: function($rootScope, $scope) {
+        return $rootScope.$on('MojioObjectSelected', function(event, data) {
+          if (data.Type === "User") {
+            showLocation("Users/" + data._id + "/Vehicles");
+            return;
+          }
+          if (data.Type === "Trip") {
+            showDirection("Trips/" + data._id + "/Events");
+            return;
+          }
+        });
+      },
+      link: function(scope, element, attrs) {
+        var notFullScreenHeight, oldRow;
+        state.element = element[0];
+        state.attrs = attrs;
+        notFullScreenHeight = state.element.parentNode.style.height;
+        state.element.style.height = state.element.parentNode.style.height;
+        oldRow = scope.$parent.v.Row;
+        window.setInterval(function() {
+          if (screenfull.isFullscreen && oldRow !== -1) {
+            state.element.parentNode.style.height = window.innerHeight + "px";
+            state.element.style.height = state.element.parentNode.style.height;
+            google.maps.event.trigger(state.map, "resize");
+            oldRow = -1;
+          }
+          if (!screenfull.isFullscreen && oldRow === -1) {
+            state.element.parentNode.style.height = notFullScreenHeight;
+            state.element.style.height = state.element.parentNode.style.height;
+            google.maps.event.trigger(state.map, "resize");
+            oldRow = scope.$parent.v.Row;
+          }
+          if (oldRow !== scope.$parent.v.Row && oldRow !== -1) {
+            oldRow = scope.$parent.v.Row;
+            state.element.style.height = state.element.parentNode.style.height;
+            return google.maps.event.trigger(state.map, "resize");
+          }
+        }, 1000);
+        showLocation('vehicles');
+      }
+    };
+  };
+  return module.directive('widgetVehiclesOnMap', widgetVehiclesOnMap);
 })(angular.module('angle'));
 
 (function(module) {
@@ -4269,129 +4534,26 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
-  var widgetVehiclesOnMap;
-  widgetVehiclesOnMap = function($window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    var showDirection, showLocation, state;
-    showDirection = function(model) {
-      mojioRemote.GET(model, 10000, 0, "", "sortBy=Time", function(result) {
-        var AllCoordinates, bounds, d, data, i, len, maker, marker, myOptions, tripPath;
-        data = result.Data;
-        myOptions = {
-          navigationControlOptions: {
-            style: google.maps.NavigationControlStyle.SMALL
-          },
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        maker = null;
-        state.map = new google.maps.Map(state.element, myOptions);
-        bounds = new google.maps.LatLngBounds();
-        AllCoordinates = [];
-        for (i = 0, len = data.length; i < len; i++) {
-          d = data[i];
-          marker = new google.maps.Marker({
-            position: new google.maps.LatLng(d.Location.Lat, d.Location.Lng),
-            map: state.map,
-            title: d.Name
-          });
-          AllCoordinates.push(new google.maps.LatLng(d.Location.Lat, d.Location.Lng));
-          bounds.extend(marker.getPosition());
-        }
-        state.map.fitBounds(bounds);
-        tripPath = new google.maps.Polyline({
-          path: AllCoordinates,
-          geodesic: true,
-          strokeColor: '#FF0000',
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        return tripPath.setMap(state.map);
-      }, function(result) {
-        return elm.innerHTML = "?";
-      });
-    };
-    showLocation = function(model) {
-      mojioRemote.GET(model, 100, 0, "", "sortBy=LastContactTime&desc=true", function(result) {
-        var bounds, d, data, extendPoint1, extendPoint2, i, len, maker, marker, myOptions;
-        data = result.Data;
-        myOptions = {
-          navigationControlOptions: {
-            style: google.maps.NavigationControlStyle.SMALL
-          },
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        maker = null;
-        state.map = new google.maps.Map(state.element, myOptions);
-        bounds = new google.maps.LatLngBounds();
-        for (i = 0, len = data.length; i < len; i++) {
-          d = data[i];
-          marker = new google.maps.Marker({
-            position: new google.maps.LatLng(d.LastLocation.Lat, d.LastLocation.Lng),
-            map: state.map,
-            title: d.Name
-          });
-          bounds.extend(marker.getPosition());
-        }
-        if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
-          extendPoint1 = new google.maps.LatLng(bounds.getNorthEast().lat() + 0.003, bounds.getNorthEast().lng() + 0.003);
-          extendPoint2 = new google.maps.LatLng(bounds.getNorthEast().lat() - 0.003, bounds.getNorthEast().lng() - 0.003);
-          bounds.extend(extendPoint1);
-          bounds.extend(extendPoint2);
-        }
-        return state.map.fitBounds(bounds);
-      }, function(result) {
-        return elm.innerHTML = "?";
-      });
-    };
-    state = {
-      map: null,
-      element: null,
-      attrs: null
-    };
+  var eventGrid;
+  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
       restrict: 'EA',
-      controller: function($rootScope, $scope) {
-        return $rootScope.$on('MojioObjectSelected', function(event, data) {
-          if (data.Type === "User") {
-            showLocation("Users/" + data._id + "/Vehicles");
-            return;
-          }
-          if (data.Type === "Trip") {
-            showDirection("Trips/" + data._id + "/Events");
-            return;
-          }
-        });
+      templateUrl: 'app/views/event_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subSubsGrid: '='
       },
-      link: function(scope, element, attrs) {
-        var notFullScreenHeight, oldRow;
-        state.element = element[0];
-        state.attrs = attrs;
-        notFullScreenHeight = state.element.parentNode.style.height;
-        state.element.style.height = state.element.parentNode.style.height;
-        oldRow = scope.$parent.v.Row;
-        window.setInterval(function() {
-          if (screenfull.isFullscreen && oldRow !== -1) {
-            state.element.parentNode.style.height = window.innerHeight + "px";
-            state.element.style.height = state.element.parentNode.style.height;
-            google.maps.event.trigger(state.map, "resize");
-            oldRow = -1;
-          }
-          if (!screenfull.isFullscreen && oldRow === -1) {
-            state.element.parentNode.style.height = notFullScreenHeight;
-            state.element.style.height = state.element.parentNode.style.height;
-            google.maps.event.trigger(state.map, "resize");
-            oldRow = scope.$parent.v.Row;
-          }
-          if (oldRow !== scope.$parent.v.Row && oldRow !== -1) {
-            oldRow = scope.$parent.v.Row;
-            state.element.style.height = state.element.parentNode.style.height;
-            return google.maps.event.trigger(state.map, "resize");
-          }
-        }, 1000);
-        showLocation('vehicles');
-      }
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
     };
   };
-  return module.directive('widgetVehiclesOnMap', widgetVehiclesOnMap);
+  return module.directive('eventGrid', [eventGrid]);
 })(angular.module('angle'));
 
 (function(module) {
@@ -4416,29 +4578,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('deviceGrid', [deviceGrid]);
-})(angular.module('angle'));
-
-(function(module) {
-  var eventGrid;
-  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/event_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('eventGrid', [eventGrid]);
 })(angular.module('angle'));
 
 (function(module) {

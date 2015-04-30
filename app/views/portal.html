@@ -80,6 +80,12 @@
                         <select ng-model="v.Style" ng-options="st.Style as st.Title for st in styles" class="form-control"></select>
                      </div>
                   </div>
+                  <div ng-repeat="(dkey,dval) in v.Data" class="form-group">
+                     <div class="input-group">
+                        <div>{{dval.Title}}</div>
+                        <textarea ng-model="dval.Data"></textarea>
+                     </div>
+                  </div>
                </div>
                <div ng-if="v.Footer" class="panel-footer">{{v.Footer}}</div>
             </div>
