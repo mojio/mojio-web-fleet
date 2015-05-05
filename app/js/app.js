@@ -14,7 +14,7 @@ if (typeof $ === 'undefined') {
   throw new Error('This application\'s JavaScript requires jQuery');
 }
 
-App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage', 'ngCookies', 'pascalprecht.translate', 'ui.bootstrap', 'ui.router', 'cfp.loadingBar', 'ngSanitize', 'ngResource', 'ui.utils', 'toaster', 'jsonFormatter']).run([
+App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage', 'ngCookies', 'pascalprecht.translate', 'ui.bootstrap', 'ui.router', 'cfp.loadingBar', 'ngSanitize', 'ngResource', 'ui.utils', 'toaster', 'jsonFormatter', 'angularRangeSlider', 'xeditable']).run([
   'mojioGlobal', '$rootScope', '$state', '$stateParams', '$window', '$templateCache', function(mojioGlobal, $rootScope, $state, $stateParams, $window, $templateCache) {
     var today, todayString, yesterday, yesterdayString;
     $rootScope.$state = $state;
@@ -60,7 +60,7 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
     yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
     $rootScope.selectedMenu = '';
     if ($rootScope.selectedMenu === '') {
-      $rootScope.selectedMenu = 'MyMojio';
+      $rootScope.selectedMenu = 'Developer';
     }
     $rootScope.sidebarMenuData = {
       'MyMojio': {
@@ -369,6 +369,10 @@ App.config([
       url: '/managepages/:id',
       title: 'Manage Pages',
       templateUrl: helper.basepath('manage_pages.html')
+    }).state('dev.simulator', {
+      url: '/simulator',
+      title: 'Simulator',
+      templateUrl: helper.basepath('simulator.html')
     });
   }
 ]).config([
@@ -2669,38 +2673,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
-  var importDevicesController;
-  importDevicesController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    $scope.data = {
-      Description: '',
-      Name: '',
-      deviceList: ''
-    };
-    $scope.importData = function() {
-      var data;
-      data = {
-        Description: $scope.data,
-        Name: $scope.data.Name,
-        RequestData: $scope.data.deviceList.split('\r'),
-        Type: 'Operation'
-      };
-      return mojioRemote.POST("mojios/mojioinventory", data, function(result) {
-        return toaster.success({
-          title: "Import Device",
-          body: "Import Device Successfully"
-        });
-      }, function() {
-        return toaster.error({
-          title: "Import Device",
-          body: "Error Importing Device"
-        });
-      });
-    };
-  };
-  module.controller('importDevicesController', importDevicesController);
-})(angular.module('angle'));
-
-(function(module) {
   var importSimsController;
   importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     $scope.data = {
@@ -2738,6 +2710,38 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('importSimsController', importSimsController);
+})(angular.module('angle'));
+
+(function(module) {
+  var importDevicesController;
+  importDevicesController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    $scope.data = {
+      Description: '',
+      Name: '',
+      deviceList: ''
+    };
+    $scope.importData = function() {
+      var data;
+      data = {
+        Description: $scope.data,
+        Name: $scope.data.Name,
+        RequestData: $scope.data.deviceList.split('\r'),
+        Type: 'Operation'
+      };
+      return mojioRemote.POST("mojios/mojioinventory", data, function(result) {
+        return toaster.success({
+          title: "Import Device",
+          body: "Import Device Successfully"
+        });
+      }, function() {
+        return toaster.error({
+          title: "Import Device",
+          body: "Error Importing Device"
+        });
+      });
+    };
+  };
+  module.controller('importDevicesController', importDevicesController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -3483,6 +3487,526 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
   module.controller('portalController', portalController);
 })(angular.module('angle'));
 
+(function(module) {
+  var simulatorController;
+  simulatorController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    var myOptions;
+    $scope.Settings = {
+      Duration: 2,
+      NoOfEvents: 90,
+      RPM: {
+        Min: 0,
+        Max: 2000
+      },
+      Speed: {
+        Min: 0,
+        Max: 120
+      },
+      Fuel: {
+        Min: 70,
+        Max: 80
+      }
+    };
+    $scope.tabActivity = [false, false];
+    $scope.SelectedEvent = null;
+    $scope.SelectedVehicle = null;
+    $scope.Vehicles = null;
+    mojioRemote.GET("Users/" + mojioGlobal.data.user_data.id + "/Vehicles", 20, null, null, null, function(result) {
+      $scope.Vehicles = result.Data;
+      return $scope.SelectedVehicle = $scope.Vehicles[0]._id;
+    });
+    $scope.Info = {
+      EventsNo: 0,
+      StepsNo: 0
+    };
+    $scope.steps = null;
+    $scope.EventTypes = [
+      {
+        value: "TripStatus",
+        text: 'Trip Status'
+      }, {
+        value: "IgnitionOn",
+        text: 'Ignition On'
+      }, {
+        value: "IgnitionOff",
+        text: 'Ignition Off'
+      }
+    ];
+    $scope.Events = [
+      {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:02.458Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "900dbdb3-7d58-434a-9507-916ebcd89992",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:04.602Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "be297caa-91d0-4555-b7b3-aba8960bfd61",
+        "_deleted": false,
+        _viewStatus: 'e'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.049833331257104874,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "IgnitionOn",
+        "Time": "2015-04-15T20:33:05.173Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "950733d3-8347-427e-b7dc-86728f3693fa",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:05.719Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "b4d655fb-a08a-4801-8ff8-8be51df56019",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:06.513Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "5e1d0c3b-5b7a-4e6d-b8fe-21a83593eef2",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:07.738Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "3e443a4d-86b6-4b7d-9ed0-c66830643792",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:08.387Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "c21c9db0-5894-4933-92ef-4cdc1d27d13b",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:09.01Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        "_id": "a39f30c2-d2a0-4cc0-a160-e0d8cc762fae",
+        "_deleted": false,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:09.927Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        _viewStatus: 'c'
+      }, {
+        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
+        "Altitude": 160.0780029296875,
+        "Heading": 27.0,
+        "Distance": 0.0,
+        "FuelLevel": null,
+        "FuelEfficiency": null,
+        "Speed": 69.0,
+        "Acceleration": null,
+        "Deceleration": null,
+        "Odometer": null,
+        "OdometerRollover": null,
+        "RPM": 4832,
+        "Type": "Event",
+        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
+        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
+        "OwnerId": null,
+        "EventType": "TripStatus",
+        "Time": "2015-04-15T20:33:10.572Z",
+        "Location": {
+          "Lat": 49.278621673583984,
+          "Lng": -123.12319183349609,
+          "FromLockedGPS": false,
+          "Dilution": 0.0,
+          "IsValid": true
+        },
+        "Accelerometer": null,
+        "TimeIsApprox": true,
+        "BatteryVoltage": null,
+        "ConnectionLost": null,
+        _viewStatus: 'c'
+      }
+    ];
+    $scope.createMarker = function(latlng, name, html, color) {
+      var contentString, marker;
+      contentString = html;
+      marker = new google.maps.Marker({
+        position: latlng,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          strokeColor: color,
+          scale: 3
+        },
+        draggable: true,
+        map: $scope.map,
+        zIndex: Math.round(latlng.lat() * -100000) << 5
+      });
+      google.maps.event.trigger(marker, 'click');
+      return marker;
+    };
+    $scope.PointType = "s";
+    $scope.Marker = {
+      Start: null,
+      End: null,
+      WayPoint: []
+    };
+    myOptions = {
+      zoom: 8,
+      center: new google.maps.LatLng(43.907787, -79.359741),
+      mapTypeControl: true,
+      mapTypeControlOptions: {
+        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+      },
+      navigationControl: true,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    $scope.map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    $scope.directionsDisplay = new google.maps.DirectionsRenderer();
+    $scope.directionsService = new google.maps.DirectionsService();
+    google.maps.event.addListener($scope.map, 'click', function(event) {
+      var CurrentMarker;
+      CurrentMarker = null;
+      if ($scope.PointType === "s") {
+        if ($scope.Marker.Start) {
+          $scope.Marker.Start.setMap(null);
+          $scope.Marker.Start = null;
+        }
+        $scope.Marker.Start = $scope.createMarker(event.latLng, "Start Point", "Start Point", "blue");
+        CurrentMarker = $scope.Marker.Start;
+      }
+      if ($scope.PointType === "e") {
+        if ($scope.Marker.End) {
+          $scope.Marker.End.setMap(null);
+          $scope.Marker.End = null;
+        }
+        $scope.Marker.End = $scope.createMarker(event.latLng, "End Point", "End Point", "red");
+        CurrentMarker = $scope.Marker.End;
+      }
+      if ($scope.PointType === "w") {
+        if ($scope.Marker.WayPoint.length < 8) {
+          $scope.Marker.WayPoint.push($scope.createMarker(event.latLng, "Way Point", "Way Point", "#green"));
+          CurrentMarker = $scope.Marker.WayPoint[$scope.Marker.WayPoint.length - 1];
+        }
+      }
+      google.maps.event.addListener(CurrentMarker, 'dragend', function(m) {
+        $scope.ShowRoute();
+      });
+      return $scope.ShowRoute();
+    });
+    $scope.ShowRoute = function() {
+      var ipos, request, waypts;
+      if (!$scope.Marker.Start || !$scope.Marker.End) {
+        return;
+      }
+      $scope.directionsDisplay.setMap(null);
+      $scope.directionsDisplay.setMap($scope.map);
+      waypts = [];
+      ipos = 0;
+      while (ipos < $scope.Marker.WayPoint.length) {
+        waypts.push({
+          location: $scope.Marker.WayPoint[ipos].position,
+          stopover: true
+        });
+        ipos++;
+      }
+      request = {
+        origin: $scope.Marker.Start.position,
+        destination: $scope.Marker.End.position,
+        waypoints: waypts,
+        optimizeWaypoints: true,
+        travelMode: google.maps.TravelMode.DRIVING
+      };
+      $scope.directionsService.route(request, function(response, status) {
+        if (status === google.maps.DirectionsStatus.OK) {
+          $scope.Info.EventsNo = 0;
+          $scope.Info.StepsNo = 0;
+          ipos = 0;
+          $scope.$apply(function() {
+            $scope.steps = response.routes[0].legs[0].steps;
+            return $scope.Info.StepsNo += $scope.steps.length;
+          });
+          while (ipos < $scope.steps.length) {
+            $scope.$apply(function() {
+              return $scope.Info.EventsNo += $scope.steps[ipos].path.length;
+            });
+            ipos++;
+          }
+          return $scope.directionsDisplay.setDirections(response);
+        }
+      });
+    };
+    $scope.CreateEvents = function() {
+      alert("CreateEvents");
+    };
+    $scope.selectTab = function(tab) {
+      var showEventProperties, showEvents;
+      alert(tab);
+      if (tab === 0) {
+        showEventProperties = false;
+        showEvents = true;
+      } else {
+        showEventProperties = true;
+        showEvents = false;
+      }
+    };
+    $scope.modifyEvent = function(row) {
+      $scope.tabActivity[0] = false;
+      $scope.tabActivity[1] = true;
+      $scope.SelectedEvent = row;
+    };
+    $scope.showEventField = function(key) {
+      if (key[0] === '_' || key === "Location" || key === "EventType" || key === "Time") {
+        return false;
+      }
+      if (key === "TripId" || key === "VehicleId" || key === "Type" || key === "MojioId") {
+        return false;
+      }
+      if (key === "OwnerId") {
+        return false;
+      }
+      return true;
+    };
+    $scope.ChangeViewStatus = function(ev) {
+      if (ev._viewStatus === 'c') {
+        ev._viewStatus = 'e';
+      } else {
+        ev._viewStatus = 'c';
+      }
+    };
+  };
+  module.controller('simulatorController', simulatorController);
+})(angular.module('angle'));
+
 angular.module('angle').filter('hhmmss', function() {
   return function(sec) {
     var toHHMMSS;
@@ -3595,10 +4119,10 @@ angular.module('angle').filter('timeago', function() {
       scope: {
         data: '='
       },
-      controller: function($rootScope, $scope, $http) {
+      controller: function($rootScope, $scope, $http, $sce) {
         $http.get($scope.data.url.Data).success(function(response) {
-          console.log(response);
-          return $scope.node = response;
+          $scope.node = response;
+          return $scope.pages = [];
         });
         $scope.FileTitle = function(node) {
           var title;
@@ -3612,16 +4136,55 @@ angular.module('angle').filter('timeago', function() {
           return title;
         };
         $scope.ViewMode = "toc";
-        $scope.NodeClick = function(node) {
-          $scope.ViewMode = "html";
-          $scope.Title = $scope.FileTitle(node);
-          $scope.GitHubUrl = $scope.data.github.Data + node.path + "/" + node.name;
-          $http.get(node.path + "/" + node.name).success(function(response) {
-            return $scope.Content = response;
+        $scope.GetContent = function(page, url) {
+          $http.get(url).success(function(response) {
+            page.Content = $sce.trustAsHtml(response.replace(/(href=")(?!https?:\/\/)(.*?)"\/?/ig, '$1javascript:window.FollowLink(\'$2\')"'));
           });
         };
+        $scope.NodeClick = function(node) {
+          var page;
+          $scope.ViewMode = "html";
+          $scope.page = [];
+          page = {
+            Title: $scope.FileTitle(node),
+            GitHubUrl: $scope.data.github.Data + node.path + "/" + node.name,
+            Content: '<i class="fa fa-spinner fa-pulse"></i>'
+          };
+          $scope.pages.push(page);
+          $scope.GetContent(page, node.path + "/" + node.name);
+          $scope.LastPage = page;
+        };
+        $scope.FollowLink = function(url) {
+          var page, title;
+          $scope.ViewMode = "html";
+          title = url;
+          if (title.lastIndexOf('/') !== -1) {
+            title = title.substring(title.lastIndexOf('/') + 1, title.length - 5);
+          }
+          if (title.indexOf('_') !== -1) {
+            title = title.substring(title.indexOf('_') + 1);
+          }
+          page = {
+            Title: title,
+            GitHubUrl: $scope.data.github.Data + url,
+            Content: '<i class="fa fa-spinner fa-pulse"></i>'
+          };
+          $scope.pages.push(page);
+          $scope.GetContent(page, url);
+          $scope.LastPage = page;
+        };
+        window.FollowLink = $scope.FollowLink;
+        $scope.ShowPage = function(page) {
+          var ipos;
+          ipos = 0;
+          while (ipos < $scope.pages.length && $scope.pages[ipos] !== page) {
+            ipos++;
+          }
+          $scope.pages.splice(ipos + 1, $scope.pages.length - (ipos + 1));
+          $scope.LastPage = $scope.pages[ipos];
+        };
         $scope.ShowTOC = function() {
-          return $scope.ViewMode = "toc";
+          $scope.ViewMode = "toc";
         };
       },
       link: function(scope, element, attrs) {}
@@ -4534,29 +5097,6 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
-  var eventGrid;
-  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/event_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('eventGrid', [eventGrid]);
-})(angular.module('angle'));
-
-(function(module) {
   var deviceGrid;
   deviceGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -4578,6 +5118,29 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('deviceGrid', [deviceGrid]);
+})(angular.module('angle'));
+
+(function(module) {
+  var eventGrid;
+  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/event_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('eventGrid', [eventGrid]);
 })(angular.module('angle'));
 
 (function(module) {

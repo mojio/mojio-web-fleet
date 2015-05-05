@@ -5,11 +5,14 @@
    <div class="col-md-12">
       <ul ng-if="ViewMode == 'toc'" class="fa-ul">
          <li ng-repeat="node in node.children" ng-include="'tree_item_renderer.html'"></li>
-      </ul><a ng-if="ViewMode == 'html'" ng-href="{{GitHubUrl}}" class="pull-right"><i class="fa fa-github"></i>&nbsp; Edit on GitHub</a><a ng-if="ViewMode == 'html'" ng-click="ShowTOC()"><i class="fa fa-chevron-left"></i>&nbsp; Back to Table of Contents</a>
-      <ul
-      ng-if="ViewMode == 'html'">
-         <h4>{{Title}}</h4>
-         <div ng-bind-html="Content" class="col-md-12"></div>
-         </ul>
+      </ul><a ng-if="ViewMode == 'html'" target="_blank" ng-href="{{LastPage.GitHubUrl}}" class="pull-right"><i class="fa fa-github"></i>&nbsp; Edit on GitHub</a>
+      <span ng-if="ViewMode == 'html'" ng-click="ShowTOC()" popover="TOC" popover-placement="bottom"
+      popover-trigger="mouseenter" class="fa-stack fa-lg"><i class="fa fa-circle-thin fa-stack-2x"></i><i class="fa fa-bars fa-stack-1x"></i>
+      </span>
+      <span ng-if="ViewMode == 'html' &amp;&amp; p!=LastPage" ng-repeat="p in pages"><i class="fa fa-arrow-left"></i>
+         <span ng-click="ShowPage(p)" popover="{{p.Title}}" popover-placement="bottom" popover-trigger="mouseenter" class="fa-stack fa-lg"><i class="fa fa-circle-thin fa-stack-2x"></i><i class="fa fa-file-o fa-stack-1x"></i>
+         </span>
+      </span>
+      <div ng-if="ViewMode == 'html'" ng-bind-html="LastPage.Content" class="col-md-12"></div>
    </div>
 </div>
