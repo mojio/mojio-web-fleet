@@ -6,91 +6,114 @@
                <div id="map_canvas" style="height:248px"></div>
             </div>
             <div class="panel-footer">
-               <button ng-click="PointType='s'" type="button" ng-class="{'btn-success':PointType=='s','btn-default':PointType!='s'}" class="mb-sm btn"><i ng-class="{'fa-check-square-o':PointType=='s','fa-square-o':PointType!='s'}" class="fa"></i>&nbsp;Start Point</button>
-               <button ng-click="PointType='w'" type="button" ng-class="{'btn-success':PointType=='w','btn-default':PointType!='w'}"
-               class="mb-sm btn"><i ng-class="{'fa-check-square-o':PointType=='w','fa-square-o':PointType!='w'}" class="fa"></i>&nbsp;Way Point</button>
-               <button ng-click="PointType='e'" type="button" ng-class="{'btn-success':PointType=='e','btn-default':PointType!='e'}"
-               class="mb-sm btn"><i ng-class="{'fa-check-square-o':PointType=='e','fa-square-o':PointType!='e'}" class="fa"></i>&nbsp;End Point</button>
+               <button ng-click="PointType='s'" type="button" ng-class="{'btn-success':PointType=='s','btn-default':PointType!='s'}" class="mb-sm btn btn-labeled">
+                  <span class="btn-label"><i class="fa fa-street-view"></i>
+                  </span>&nbsp;Start Point</button>
+               <button ng-click="PointType='w'" type="button" ng-class="{'btn-success':PointType=='w','btn-default':PointType!='w'}" class="mb-sm btn btn-labeled">
+                  <span class="btn-label"><i class="fa fa-street-view"></i>
+                  </span>&nbsp;Way Point</button>
+               <button ng-click="PointType='e'" type="button" ng-class="{'btn-success':PointType=='e','btn-default':PointType!='e'}" class="mb-sm btn btn-labeled">
+                  <span class="btn-label"><i class="fa fa-street-view"></i>
+                  </span>&nbsp;End Point</button>&nbsp;&nbsp;&nbsp;&nbsp;
+               <button ng-if="steps!=null" ng-click="CreateEvents()" class="mb-sm btn btn-labeled btn-info">
+                  <span class="btn-label"><i class="fa fa-bolt"></i>
+                  </span>Create Events</button>
             </div>
          </div>
       </div>
       <div class="col-md-3">
-         <div class="panel panel-default">
+         <div ng-if="steps!=null" class="panel panel-default">
             <div class="panel-heading">
-               <h4 class="panel-title">Settings & Operation</h4>
-               <div style="height:300px;overflow-y:scroll" class="panel-body">
-                  <div class="row">
-                     <div class="col-md-4">Vehicle</div>
-                     <div class="col-md-8">
-                        <select ng-if="Vehicles!=null" ng-model="SelectedVehicle" class="form-control">
-                           <option ng-repeat="v in Vehicles" value="{{v._id}}">{{v.Name}}</option>
-                        </select>
-                     </div>
+               <h4 class="panel-title">Settings</h4>
+            </div>
+            <div style="height:300px;overflow-y:scroll" class="panel-body">
+               <div class="row">
+                  <div class="col-md-5">Vehicle</div>
+                  <div class="col-md-7">
+                     <select ng-if="Vehicles!=null" ng-model="SelectedVehicle" class="form-control">
+                        <option ng-repeat="v in Vehicles" value="{{v._id}}">{{v.Name}}</option>
+                     </select>
                   </div>
-                  <div class="row">
-                     <div class="col-md-4">Duration: {{Settings.Duration}}</div>
-                     <div class="col-md-8">
-                        <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="9" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.Duration"></div>
-                     </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">Duration: {{Settings.Duration}}</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="9" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.Duration"></div>
                   </div>
-                  <div class="row">
-                     <div class="col-md-4">Events%: {{Settings.NoOfEvents}}</div>
-                     <div class="col-md-8">
-                        <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="100" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.NoOfEvents"></div>
-                     </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">Events%: {{Settings.NoOfEvents}}</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="100" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.NoOfEvents"></div>
                   </div>
-                  <div class="row">
-                     <div class="col-md-4">RPM: {{Settings.RPM.Min}} - {{Settings.RPM.Max}}</div>
-                     <div class="col-md-8">
-                        <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="5000" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.RPM.Min" data-ng-model-high="Settings.RPM.Max"></div>
-                     </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">RPM: {{Settings.RPM.Min}} - {{Settings.RPM.Max}}</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="5000" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.RPM.Min" data-ng-model-high="Settings.RPM.Max"></div>
                   </div>
-                  <div class="row">
-                     <div class="col-md-4">Speed: {{Settings.Speed.Min}} - {{Settings.Speed.Max}}</div>
-                     <div class="col-md-8">
-                        <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="200" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.Speed.Min" data-ng-model-high="Settings.Speed.Max"></div>
-                     </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">Speed: {{Settings.Speed.Min}} - {{Settings.Speed.Max}}</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="200" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.Speed.Min" data-ng-model-high="Settings.Speed.Max"></div>
                   </div>
-                  <div class="row">
-                     <div class="col-md-4">Fuel: {{Settings.Fuel.Min}} - {{Settings.Fuel.Max}}</div>
-                     <div class="col-md-8">
-                        <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="100" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.Fuel.Min" data-ng-model-high="Settings.Fuel.Max"></div>
-                     </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">Fuel: {{Settings.Fuel.Min}} - {{Settings.Fuel.Max}}</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="0" data-ceiling="100" data-step="1" data-precision="1" data-highlight="left" data-ng-model-low="Settings.Fuel.Min" data-ng-model-high="Settings.Fuel.Max"></div>
                   </div>
-                  <br/>
-                  <button ng-if="steps!=null" ng-click="CreateEvents()" class="mb-sm btn btn-success">Create Events</button>
+               </div>
+               <div class="row">
+                  <div class="col-md-5">Special Event: {{Settings.SpecialEventChance}}%</div>
+                  <div class="col-md-7">
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="10" data-ceiling="90" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.SpecialEventChance"></div>
+                  </div>
                </div>
             </div>
          </div>
       </div>
       <div class="col-md-4">
-         <div class="panel panel-default">
+         <div ng-if="Events!=null" class="panel panel-default">
             <div class="panel-heading">
                <h4 class="panel-title">Events</h4>
-               <div style="height:300px;overflow-y:scroll" class="panel-body">
-                  <ul class="fa-ul">
-                     <li ng-repeat="ev in Events"><i ng-click="ChangeViewStatus(ev)" ng-class="{'fa-caret-right':ev._viewStatus=='c','fa-caret-down':ev._viewStatus=='e'}" class="fa fa-li"></i>{{$index}}:<a editable-select="ev.EventType" buttons="no" e-ng-options="s.value as s.text for s in EventTypes">{{ev.EventType}}</a>
-                        <ul
-                        ng-if="ev._viewStatus=='e'">
-                           <li ng-repeat="(key,fl) in ev" ng-if="showEventField(key)">{{key}}:<a editable-text="fl" buttons="no">{{fl || "null"}}</a>
-                           </li>
-                  </ul>
-                  </li>
-                  </ul>
-               </div>
+            </div>
+            <div style="height:241px;overflow-y:scroll" class="panel-body">
+               <ul class="fa-ul">
+                  <li ng-repeat="ev in Events"><i ng-click="ChangeViewStatus(ev)" ng-class="{'fa-caret-right':ev._viewStatus=='c','fa-caret-down':ev._viewStatus=='e'}" class="fa fa-li"></i>{{$index}}:<a editable-select="ev.EventType" buttons="no" e-ng-options="s.value as s.text for s in EventTypes">{{ev.EventType}}</a>
+                     <ul
+                     ng-if="ev._viewStatus=='e'">
+                        <li ng-repeat="(key,fl) in ev">{{key}}:&nbsp;<a ng-if="showEventField(key)" editable-text="fl" buttons="no">{{(fl==="" || fl===null)?"null":fl}}</a>
+                           <span ng-if="key=='Location'">[{{fl.Lat}},{{fl.Lng}}]</span>
+                        </li>
+               </ul>
+               </li>
+               </ul>
+            </div>
+            <div class="panel-footer">
+               <button ng-if="SimulationMode!='Play'" ng-click="SimulationPlay()" type="button" class="mb-sm btn btn-labeled btn-success">
+                  <span class="btn-label"><i class="fa fa-play"></i>
+                  </span>&nbsp;Play</button>
+               <button ng-if="SimulationMode=='Play'" ng-click="SimulationPause()" type="button" class="mb-sm btn btn-labeled btn-info">
+                  <span class="btn-label"><i class="fa fa-pause"></i>
+                  </span>&nbsp;Pause</button>
+               <button ng-if="SimulationMode=='Play'" ng-click="SimulationStop()" type="button" class="mb-sm btn btn-labeled btn-danger">
+                  <span class="btn-label"><i class="fa fa-stop"></i>
+                  </span>&nbsp;Stop</button>
             </div>
          </div>
       </div>
    </div>
    <div class="row">
       <div class="col-md-2">
-         <div class="panel panel-default">
+         <div ng-if="steps!=null" class="panel panel-default">
             <div class="panel-heading">
                <h4 class="panel-title">Info</h4>
-               <div class="panel-body">
-                  <div class="row">Max Events No: {{Info.EventsNo}}</div>
-                  <div class="row">Direction Steps: {{Info.StepsNo}}</div>
-               </div>
+            </div>
+            <div class="panel-body">
+               <div class="row">Max Events No: {{Info.EventsNo}}</div>
+               <div class="row">Direction Steps: {{Info.StepsNo}}</div>
             </div>
          </div>
       </div>

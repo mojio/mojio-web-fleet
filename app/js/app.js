@@ -2673,46 +2673,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
-  var importSimsController;
-  importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    $scope.data = {
-      Description: '',
-      Name: ''
-    };
-    $scope.importData = function() {
-      var action, fileInput, formdata, i, xhr;
-      action = mojioGlobal.apiUrl() + '/SimCards/InventoryAsync?desc=' + $scope.data.Description + '&name=' + $scope.data.Name;
-      formdata = new FormData;
-      fileInput = document.getElementById('csvFile');
-      i = 0;
-      while (i < fileInput.files.length) {
-        formdata.append('csvFile', fileInput.files[0], fileInput.files[0].name);
-        i++;
-      }
-      xhr = new XMLHttpRequest;
-      xhr.open('POST', action);
-      xhr.send(formdata);
-      return xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 202) {
-            toaster.success({
-              title: "Import SIMs",
-              body: "Import SIMs Successfully"
-            });
-          } else {
-            toaster.error({
-              title: "Import SIMs",
-              body: "Error Importing SIMs"
-            });
-          }
-        }
-      };
-    };
-  };
-  module.controller('importSimsController', importSimsController);
-})(angular.module('angle'));
-
-(function(module) {
   var importDevicesController;
   importDevicesController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     $scope.data = {
@@ -2801,6 +2761,46 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('manageAppsController', manageAppsController);
+})(angular.module('angle'));
+
+(function(module) {
+  var importSimsController;
+  importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    $scope.data = {
+      Description: '',
+      Name: ''
+    };
+    $scope.importData = function() {
+      var action, fileInput, formdata, i, xhr;
+      action = mojioGlobal.apiUrl() + '/SimCards/InventoryAsync?desc=' + $scope.data.Description + '&name=' + $scope.data.Name;
+      formdata = new FormData;
+      fileInput = document.getElementById('csvFile');
+      i = 0;
+      while (i < fileInput.files.length) {
+        formdata.append('csvFile', fileInput.files[0], fileInput.files[0].name);
+        i++;
+      }
+      xhr = new XMLHttpRequest;
+      xhr.open('POST', action);
+      xhr.send(formdata);
+      return xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 202) {
+            toaster.success({
+              title: "Import SIMs",
+              body: "Import SIMs Successfully"
+            });
+          } else {
+            toaster.error({
+              title: "Import SIMs",
+              body: "Error Importing SIMs"
+            });
+          }
+        }
+      };
+    };
+  };
+  module.controller('importSimsController', importSimsController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -3490,7 +3490,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 (function(module) {
   var simulatorController;
   simulatorController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    var myOptions;
+    var ChooseEventType, myOptions;
     $scope.Settings = {
       Duration: 2,
       NoOfEvents: 90,
@@ -3505,7 +3505,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       Fuel: {
         Min: 70,
         Max: 80
-      }
+      },
+      SpecialEventChance: 20
     };
     $scope.tabActivity = [false, false];
     $scope.SelectedEvent = null;
@@ -3515,6 +3516,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       $scope.Vehicles = result.Data;
       return $scope.SelectedVehicle = $scope.Vehicles[0]._id;
     });
+    $scope.SimulationMode = "Stop";
+    $scope.SimulationStep = 0;
+    $scope.SimulationTimer = null;
     $scope.Info = {
       EventsNo: 0,
       StepsNo: 0
@@ -3532,331 +3536,26 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         text: 'Ignition Off'
       }
     ];
-    $scope.Events = [
-      {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:02.458Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "900dbdb3-7d58-434a-9507-916ebcd89992",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:04.602Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "be297caa-91d0-4555-b7b3-aba8960bfd61",
-        "_deleted": false,
-        _viewStatus: 'e'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.049833331257104874,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "IgnitionOn",
-        "Time": "2015-04-15T20:33:05.173Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "950733d3-8347-427e-b7dc-86728f3693fa",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:05.719Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "b4d655fb-a08a-4801-8ff8-8be51df56019",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:06.513Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "5e1d0c3b-5b7a-4e6d-b8fe-21a83593eef2",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:07.738Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "3e443a4d-86b6-4b7d-9ed0-c66830643792",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:08.387Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "c21c9db0-5894-4933-92ef-4cdc1d27d13b",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:09.01Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        "_id": "a39f30c2-d2a0-4cc0-a160-e0d8cc762fae",
-        "_deleted": false,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:09.927Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        _viewStatus: 'c'
-      }, {
-        "TripId": "cbca6896-2120-4f67-af1c-2095a55b8a7d",
-        "Altitude": 160.0780029296875,
-        "Heading": 27.0,
-        "Distance": 0.0,
-        "FuelLevel": null,
-        "FuelEfficiency": null,
-        "Speed": 69.0,
-        "Acceleration": null,
-        "Deceleration": null,
-        "Odometer": null,
-        "OdometerRollover": null,
-        "RPM": 4832,
-        "Type": "Event",
-        "MojioId": "9c44acee-c846-40f5-b286-5100e540da04",
-        "VehicleId": "56b49b23-24c5-4306-9620-2fefe5641dec",
-        "OwnerId": null,
-        "EventType": "TripStatus",
-        "Time": "2015-04-15T20:33:10.572Z",
-        "Location": {
-          "Lat": 49.278621673583984,
-          "Lng": -123.12319183349609,
-          "FromLockedGPS": false,
-          "Dilution": 0.0,
-          "IsValid": true
-        },
-        "Accelerometer": null,
-        "TimeIsApprox": true,
-        "BatteryVoltage": null,
-        "ConnectionLost": null,
-        _viewStatus: 'c'
-      }
-    ];
+    $scope.EventTemplate = {
+      Codes: [""],
+      EventType: "",
+      Force: "",
+      FuelEfficiency: "",
+      FuelLevel: "",
+      Heading: "",
+      Location: {
+        Lat: "",
+        Lng: ""
+      },
+      Odometer: "",
+      RPM: "",
+      Speed: "",
+      VIN: "",
+      VehicleId: "",
+      Voltage: "",
+      _viewStatus: 'c'
+    };
+    $scope.Events = null;
     $scope.createMarker = function(latlng, name, html, color) {
       var contentString, marker;
       contentString = html;
@@ -3878,7 +3577,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     $scope.Marker = {
       Start: null,
       End: null,
-      WayPoint: []
+      WayPoint: [],
+      Current: null
     };
     myOptions = {
       zoom: 8,
@@ -3903,16 +3603,17 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         }
         $scope.Marker.Start = $scope.createMarker(event.latLng, "Start Point", "Start Point", "blue");
         CurrentMarker = $scope.Marker.Start;
-      }
-      if ($scope.PointType === "e") {
+        $scope.$apply(function() {
+          return $scope.PointType = "e";
+        });
+      } else if ($scope.PointType === "e") {
         if ($scope.Marker.End) {
           $scope.Marker.End.setMap(null);
           $scope.Marker.End = null;
         }
         $scope.Marker.End = $scope.createMarker(event.latLng, "End Point", "End Point", "red");
         CurrentMarker = $scope.Marker.End;
-      }
-      if ($scope.PointType === "w") {
+      } else if ($scope.PointType === "w") {
         if ($scope.Marker.WayPoint.length < 8) {
           $scope.Marker.WayPoint.push($scope.createMarker(event.latLng, "Way Point", "Way Point", "#green"));
           CurrentMarker = $scope.Marker.WayPoint[$scope.Marker.WayPoint.length - 1];
@@ -3955,6 +3656,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
             $scope.steps = response.routes[0].legs[0].steps;
             return $scope.Info.StepsNo += $scope.steps.length;
           });
+          console.log($scope.steps);
           while (ipos < $scope.steps.length) {
             $scope.$apply(function() {
               return $scope.Info.EventsNo += $scope.steps[ipos].path.length;
@@ -3965,12 +3667,79 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         }
       });
     };
+    ChooseEventType = function(stepNo, pathNo, stepMax, pathMax) {
+      var RandomEventTypes, eType;
+      eType = "TripStatus";
+      if (stepNo === 0 && pathNo === 0) {
+        eType = "MovementStart";
+      } else if (pathNo === 0) {
+        eType = "HeadingChange";
+      } else if (stepNo === stepMax - 1 && pathNo === pathMax - 1) {
+        eType = "MovementStop";
+      } else if (Math.random() * 100 > $scope.Settings.NoOfEvents) {
+        eType = "";
+      } else if (Math.random() > 0.8) {
+        RandomEventTypes = ["ConnectionLost", "LowBattery", "OffStatus", "FenceEntered", "FenceExited", "Accident", "HardBrake", "HardAcceleration", "Acceleration", "Deceleration"];
+        eType = RandomEventTypes[Math.floor(Math.random() * RandomEventTypes.length)];
+      }
+      return eType;
+    };
     $scope.CreateEvents = function() {
-      alert("CreateEvents");
+      var CurrentEventNo, TotalEventsNo, distanceSoFar, imax, ipos, jmax, jpos, newEvent, thisStepDistance;
+      $scope.Events = [];
+      TotalEventsNo = 0;
+      ipos = 0;
+      while (ipos < $scope.steps.length) {
+        TotalEventsNo += $scope.steps[ipos].path.length;
+        ipos++;
+      }
+      CurrentEventNo = 0;
+      newEvent = angular.copy($scope.EventTemplate);
+      newEvent.EventType = "IgnitionOn";
+      newEvent.Location.Lng = $scope.steps[0].path[0].lng();
+      newEvent.Location.Lat = $scope.steps[0].path[0].lat();
+      newEvent.VehicleId = $scope.SelectedVehicle;
+      newEvent.Odometer = 0;
+      $scope.Events.push(newEvent);
+      ipos = 0;
+      imax = $scope.steps.length;
+      distanceSoFar = 0;
+      while (ipos < imax) {
+        thisStepDistance = $scope.steps[ipos].distance.value;
+        jpos = 0;
+        jmax = $scope.steps[ipos].path.length;
+        while (jpos < jmax) {
+          newEvent = angular.copy($scope.EventTemplate);
+          newEvent.EventType = ChooseEventType(ipos, jpos, imax, jmax);
+          if (newEvent.EventType.length === 0) {
+            jpos++;
+            CurrentEventNo++;
+            continue;
+          }
+          newEvent.Location.Lng = $scope.steps[ipos].path[jpos].lng();
+          newEvent.Location.Lat = $scope.steps[ipos].path[jpos].lat();
+          newEvent.VehicleId = $scope.SelectedVehicle;
+          newEvent.RPM = Math.floor($scope.Settings.RPM.Min + ($scope.Settings.RPM.Max - $scope.Settings.RPM.Min) * Math.random());
+          newEvent.Speed = Math.floor($scope.Settings.Speed.Min + ($scope.Settings.Speed.Max - $scope.Settings.Speed.Min) * Math.random());
+          newEvent.FuelLevel = Math.round(10 * ($scope.Settings.Fuel.Max - ($scope.Settings.Fuel.Max - $scope.Settings.Fuel.Min) * CurrentEventNo / TotalEventsNo)) / 10;
+          newEvent.Odometer = distanceSoFar + Math.round(thisStepDistance * (jpos + 1) / jmax);
+          $scope.Events.push(newEvent);
+          jpos++;
+          CurrentEventNo++;
+        }
+        distanceSoFar += thisStepDistance;
+        ipos++;
+      }
+      newEvent = angular.copy($scope.EventTemplate);
+      newEvent.EventType = "IgnitionOff";
+      newEvent.Location.Lng = $scope.steps[$scope.steps.length - 1].path[$scope.steps[$scope.steps.length - 1].path.length - 1].lng();
+      newEvent.Location.Lat = $scope.steps[$scope.steps.length - 1].path[$scope.steps[$scope.steps.length - 1].path.length - 1].lat();
+      newEvent.VehicleId = $scope.SelectedVehicle;
+      newEvent.Odometer = distanceSoFar;
+      $scope.Events.push(newEvent);
     };
     $scope.selectTab = function(tab) {
       var showEventProperties, showEvents;
-      alert(tab);
       if (tab === 0) {
         showEventProperties = false;
         showEvents = true;
@@ -4001,6 +3770,41 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         ev._viewStatus = 'e';
       } else {
         ev._viewStatus = 'c';
+      }
+    };
+    $scope.SimulationPlay = function() {
+      $scope.SimulationMode = "Play";
+      $scope.SimulationNextStep();
+    };
+    $scope.SimulationPause = function() {
+      $scope.SimulationMode = "Pause";
+    };
+    $scope.SimulationStop = function() {
+      $scope.SimulationMode = "Stop";
+      $scope.SimulationStep = 0;
+    };
+    $scope.SimulationNextStep = function() {
+      var cEvent;
+      if ($scope.SimulationStep >= $scope.Events.length) {
+        $scope.$apply(function() {
+          return $scope.SimulationStop();
+        });
+        return;
+      }
+      cEvent = $scope.Events[$scope.SimulationStep];
+      if ($scope.Marker.Current) {
+        $scope.Marker.Current.setMap(null);
+        $scope.Marker.Current = null;
+      }
+      $scope.Marker.Current = $scope.createMarker(new google.maps.LatLng(cEvent.Location.Lat, cEvent.Location.Lng), "Current", "Current", "white");
+      $scope.SimulationStep++;
+      if ($scope.SimulationStep >= $scope.Events.length) {
+        $scope.$apply(function() {
+          return $scope.SimulationStop();
+        });
+        return;
+      } else if ($scope.SimulationMode === "Play") {
+        $scope.SimulationTimer = window.setTimeout($scope.SimulationNextStep, 100);
       }
     };
   };
