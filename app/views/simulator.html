@@ -42,7 +42,7 @@
                   </div>
                </div>
                <div class="row">
-                  <div class="col-md-5">Events%: {{Settings.NoOfEvents}}</div>
+                  <div class="col-md-5">Events: {{Settings.NoOfEvents}}%</div>
                   <div class="col-md-7">
                      <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="100" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.NoOfEvents"></div>
                   </div>
@@ -68,7 +68,7 @@
                <div class="row">
                   <div class="col-md-5">Special Event: {{Settings.SpecialEventChance}}%</div>
                   <div class="col-md-7">
-                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="10" data-ceiling="90" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.SpecialEventChance"></div>
+                     <div style="margin-top:8px;width:150px" data-range-slider="data-range-slider" data-floor="1" data-ceiling="90" data-step="1" data-precision="1" data-highlight="left" data-ng-model="Settings.SpecialEventChance"></div>
                   </div>
                </div>
             </div>
@@ -84,7 +84,7 @@
                   <li ng-repeat="ev in Events"><i ng-click="ChangeViewStatus(ev)" ng-class="{'fa-caret-right':ev._viewStatus=='c','fa-caret-down':ev._viewStatus=='e'}" class="fa fa-li"></i>{{$index}}:<a editable-select="ev.EventType" buttons="no" e-ng-options="s.value as s.text for s in EventTypes">{{ev.EventType}}</a>
                      <ul
                      ng-if="ev._viewStatus=='e'">
-                        <li ng-repeat="(key,fl) in ev">{{key}}:&nbsp;<a ng-if="showEventField(key)" editable-text="fl" buttons="no">{{(fl==="" || fl===null)?"null":fl}}</a>
+                        <li ng-repeat="(key,fl) in ev" ng-if="showEventField(key) || key=='Location'">{{key}}:&nbsp;<a ng-if="showEventField(key)" editable-text="fl" buttons="no">{{(fl==="" || fl===null)?"null":fl}}</a>
                            <span ng-if="key=='Location'">[{{fl.Lat}},{{fl.Lng}}]</span>
                         </li>
                </ul>
@@ -112,8 +112,35 @@
                <h4 class="panel-title">Info</h4>
             </div>
             <div class="panel-body">
-               <div class="row">Max Events No: {{Info.EventsNo}}</div>
-               <div class="row">Direction Steps: {{Info.StepsNo}}</div>
+               <div class="row">
+                  <div class="col-md-12">Max Events No: {{Info.EventsNo}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Direction Steps: {{Info.StepsNo}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Current Step: {{SimulationStep}} / {{Events.length}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">
+                     <H3>{{Info.LastImportantEvent.EventType}}</H3>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Last Event: &nbsp;{{Info.LastEvent.EventType}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Distance: &nbsp;{{Info.LastEvent.Odometer}}m</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">RPM: &nbsp;{{Info.LastEvent.RPM}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Speed: &nbsp;{{Info.LastEvent.Speed}}</div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">Fuel: &nbsp;{{Info.LastEvent.FuelLevel}}%</div>
+               </div>
             </div>
          </div>
       </div>

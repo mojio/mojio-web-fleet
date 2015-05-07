@@ -25,7 +25,6 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
       job: 'Admin',
       picture: 'app/img/user/02.jpg'
     };
-    mojioGlobal.checkAccess();
 
     /*$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
         if (typeof(toState) !== 'undefined'){
@@ -58,16 +57,10 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
     yesterday.setDate((new Date()).getDate() - 1);
     todayString = today.getFullYear() + "." + (today.getMonth() + 1) + "." + today.getDate();
     yesterdayString = yesterday.getFullYear() + "." + (yesterday.getMonth() + 1) + "." + yesterday.getDate();
-    $rootScope.selectedMenu = '';
-    if ($rootScope.selectedMenu === '') {
-      $rootScope.selectedMenu = 'Developer';
-    }
-    $rootScope.sidebarMenuData = {
+    $rootScope.ProjectOptions = {
       'MyMojio': {
-        'text': 'MyMojio',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
+        BackEnd: 1,
+        SidebarMenu: [
           {
             'text': 'Dashboard',
             'sref': 'my.dashboard',
@@ -99,10 +92,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         ]
       },
       'Fleet': {
-        'text': 'Fleet',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
+        BackEnd: 1,
+        SidebarMenu: [
           {
             'text': 'Dashboard',
             'sref': 'app.mymojiodashboard',
@@ -146,10 +137,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         ]
       },
       'MojioAdmin': {
-        'text': 'Mojio Admin',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
+        BackEnd: 1,
+        SidebarMenu: [
           {
             'text': 'Dashboard',
             'sref': 'admin.dashboard',
@@ -225,10 +214,8 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         ]
       },
       'Developer': {
-        'text': 'Developer',
-        'sref': '',
-        'icon': 'fa fa-file-o',
-        'submenu': [
+        BackEnd: 2,
+        SidebarMenu: [
           {
             'text': 'Manage Apps',
             'sref': 'dev.manageapps',
@@ -243,6 +230,11 @@ App = angular.module('angle', ['smart-table', 'ngRoute', 'ngAnimate', 'ngStorage
         ]
       }
     };
+    $rootScope.selectedProject = '';
+    if ($rootScope.selectedProject === '') {
+      $rootScope.selectedProject = $rootScope.ProjectOptions.Developer;
+    }
+    mojioGlobal.checkAccess();
   }
 ]);
 
@@ -859,7 +851,7 @@ App.controller('AppController', [
 App.controller('SidebarController', [
   '$rootScope', '$scope', '$state', '$http', '$timeout', 'Utils', function($rootScope, $scope, $state, $http, $timeout, Utils) {
     var closeAllBut, collapseList, isActive, isChild, sidebarMenuData;
-    sidebarMenuData = $rootScope.sidebarMenuData[$rootScope.selectedMenu].submenu;
+    sidebarMenuData = $rootScope.selectedProject.SidebarMenu;
     collapseList = [];
     closeAllBut = function(index) {
       var i;
@@ -1596,7 +1588,7 @@ App.factory('colors', [
 (function(common) {
   var mojioGlobal;
   mojioGlobal = function($http, localStorage, $rootScope) {
-    var GoToOAuth, TOKENKEY, USERKEY, apiUrl, changeProducationMode, checkAccess, createMojioForSignal, data, logout;
+    var GoToOAuth, TOKENKEY, USERKEY, apiUrl, checkAccess, createMojioForSignal, data, logout;
     TOKENKEY = 'ACCESS_TOKEN_KEY';
     USERKEY = 'USER_DATA_KEY';
     data = {
@@ -1607,7 +1599,6 @@ App.factory('colors', [
       redirect_uri: window.location.href.split('#')[0],
       access_token: '',
       user_data: null,
-      producationMode: 1,
       settings: [
         {
           hostname: 'develope.api.moj.io',
@@ -1621,8 +1612,8 @@ App.factory('colors', [
           logout: 'https://api.moj.io/account/logout'
         }, {
           hostname: 'api.moj.io',
-          url: 'https://staging.moj.io/v1/',
-          login: 'https://api.moj.io/OAuth2/authorize',
+          url: 'https://api.moj.io/v1/',
+          login: 'https://api.moj.io/OAuth2SandBox/authorize',
           logout: 'https://api.moj.io/account/logout'
         }
       ],
@@ -1647,22 +1638,19 @@ App.factory('colors', [
         return console.log("Mojio Client is Ready");
       });
     };
-    changeProducationMode = function() {
-      data.producationMode = 1 - data.producationMode;
-    };
     apiUrl = function() {
-      return data.settings[data.producationMode].url;
+      return data.settings[$rootScope.selectedProject.BackEnd].url;
     };
     GoToOAuth = function() {
       var m;
       localStorage.remove(TOKENKEY);
       localStorage.remove(USERKEY);
-      m = data.producationMode;
+      m = $rootScope.selectedProject.BackEnd;
       window.location = data.settings[m].login + '?response_type=token&client_id=' + data.application + '&redirect_uri=' + data.redirect_uri + '&scope=full';
     };
     logout = function() {
       var m, oldToken;
-      m = data.producationMode;
+      m = $rootScope.selectedProject.BackEnd;
       localStorage.remove(TOKENKEY);
       oldToken = data.access_token;
       data.access_token = '';
@@ -1725,8 +1713,7 @@ App.factory('colors', [
       GoToOAuth: GoToOAuth,
       checkAccess: checkAccess,
       logout: logout,
-      apiUrl: apiUrl,
-      changeProducationMode: changeProducationMode
+      apiUrl: apiUrl
     };
   };
   common.factory('mojioGlobal', mojioGlobal);
@@ -3396,6 +3383,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
     $scope.portal = [];
     mojioRemote.GET("Users/" + mojioGlobal.data.user_data.id + "/Store/" + tohash(window.location.href), null, null, null, null, function(result) {
+      console.log(result);
       return $scope.portal = JSON.parse(result);
     }, function(result) {
       return $scope.portal = [];
@@ -3446,7 +3434,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       return el;
     };
     $scope.savePortalState = function() {
-      return mojioRemote.POST("Users/" + mojioGlobal.data.user_data.id + "/Store/" + tohash(window.location.href), '"' + JSON.stringify($scope.portal).replace(/"/g, '\\\"') + '"', function(result) {}, toaster.success({
+      console.log(tohash(window.location.href));
+      console.log(JSON.stringify($scope.portal).replace(/"/g, '\\\"'));
+      return mojioRemote.POST("Users/" + mojioGlobal.data.user_data.id + "/Store/" + tohash(window.location.href), '"' + JSON.stringify($scope.portal).replace(/"/g, '\\\"').replace(/(\\r\\n|\\n|\\r)/gm, " ") + '"', function(result) {}, toaster.success({
         title: "Settings",
         body: "Settings Saved Successfully"
       }), function(result) {
@@ -3506,7 +3496,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         Min: 70,
         Max: 80
       },
-      SpecialEventChance: 20
+      SpecialEventChance: 10
     };
     $scope.tabActivity = [false, false];
     $scope.SelectedEvent = null;
@@ -3521,7 +3511,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     $scope.SimulationTimer = null;
     $scope.Info = {
       EventsNo: 0,
-      StepsNo: 0
+      StepsNo: 0,
+      LastImportantEvent: null,
+      LastEvent: null
     };
     $scope.steps = null;
     $scope.EventTypes = [
@@ -3537,7 +3529,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       }
     ];
     $scope.EventTemplate = {
-      Codes: [""],
       EventType: "",
       Force: "",
       FuelEfficiency: "",
@@ -3550,7 +3541,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       Odometer: "",
       RPM: "",
       Speed: "",
-      VIN: "",
       VehicleId: "",
       Voltage: "",
       _viewStatus: 'c'
@@ -3656,7 +3646,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
             $scope.steps = response.routes[0].legs[0].steps;
             return $scope.Info.StepsNo += $scope.steps.length;
           });
-          console.log($scope.steps);
           while (ipos < $scope.steps.length) {
             $scope.$apply(function() {
               return $scope.Info.EventsNo += $scope.steps[ipos].path.length;
@@ -3678,7 +3667,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         eType = "MovementStop";
       } else if (Math.random() * 100 > $scope.Settings.NoOfEvents) {
         eType = "";
-      } else if (Math.random() > 0.8) {
+      } else if (Math.random() * 100 <= $scope.Settings.SpecialEventChance) {
         RandomEventTypes = ["ConnectionLost", "LowBattery", "OffStatus", "FenceEntered", "FenceExited", "Accident", "HardBrake", "HardAcceleration", "Acceleration", "Deceleration"];
         eType = RandomEventTypes[Math.floor(Math.random() * RandomEventTypes.length)];
       }
@@ -3784,7 +3773,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       $scope.SimulationStep = 0;
     };
     $scope.SimulationNextStep = function() {
-      var cEvent;
+      var cEvent, date1, sEvent;
       if ($scope.SimulationStep >= $scope.Events.length) {
         $scope.$apply(function() {
           return $scope.SimulationStop();
@@ -3792,21 +3781,52 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         return;
       }
       cEvent = $scope.Events[$scope.SimulationStep];
+      $scope.Info.LastEvent = cEvent;
+      if (cEvent.EventType !== "TripStatus") {
+        $scope.Info.LastImportantEvent = cEvent;
+      }
       if ($scope.Marker.Current) {
         $scope.Marker.Current.setMap(null);
         $scope.Marker.Current = null;
       }
       $scope.Marker.Current = $scope.createMarker(new google.maps.LatLng(cEvent.Location.Lat, cEvent.Location.Lng), "Current", "Current", "white");
+      date1 = new Date();
+      sEvent = angular.copy(cEvent);
+      delete sEvent._viewStatus;
+      mojioRemote.POST("events", sEvent, function() {
+        var date2, tspan;
+        date2 = new Date();
+        tspan = date2 - date1;
+        return $scope.SimulationPrepareNextStep(tspan);
+      }, function() {
+        var date2, tspan;
+        date2 = new Date();
+        tspan = date2 - date1;
+        $scope.SimulationPrepareNextStep(tspan);
+        return $scope.SimulationPrepareNextStep();
+      });
+    };
+    $scope.SimulationPrepareNextStep = function(tspan) {
+      var delay;
       $scope.SimulationStep++;
       if ($scope.SimulationStep >= $scope.Events.length) {
-        $scope.$apply(function() {
-          return $scope.SimulationStop();
-        });
-        return;
+        if (!$scope.$$phase) {
+          $scope.$apply(function() {
+            return $scope.SimulationStop();
+          });
+        } else {
+          $scope.SimulationStop();
+        }
       } else if ($scope.SimulationMode === "Play") {
-        $scope.SimulationTimer = window.setTimeout($scope.SimulationNextStep, 100);
+        delay = $scope.Settings.Duration * 60 * 1000 / $scope.Events.length;
+        delay = delay - tspan;
+        if (delay < 1) {
+          delay = 1;
+        }
+        return $scope.SimulationTimer = window.setTimeout($scope.SimulationNextStep, delay);
       }
     };
+    return;
   };
   module.controller('simulatorController', simulatorController);
 })(angular.module('angle'));
@@ -4971,30 +4991,6 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
-  var tripGrid;
-  tripGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/trip_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subEvent: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('tripGrid', [tripGrid]);
-})(angular.module('angle'));
-
-(function(module) {
   var userGrid;
   userGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -5017,6 +5013,30 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('userGrid', [userGrid]);
+})(angular.module('angle'));
+
+(function(module) {
+  var tripGrid;
+  tripGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/trip_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subEvent: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('tripGrid', [tripGrid]);
 })(angular.module('angle'));
 
 (function(module) {
