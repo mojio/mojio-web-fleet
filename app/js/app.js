@@ -2692,6 +2692,46 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 })(angular.module('angle'));
 
 (function(module) {
+  var importSimsController;
+  importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    $scope.data = {
+      Description: '',
+      Name: ''
+    };
+    $scope.importData = function() {
+      var action, fileInput, formdata, i, xhr;
+      action = mojioGlobal.apiUrl() + '/SimCards/InventoryAsync?desc=' + $scope.data.Description + '&name=' + $scope.data.Name;
+      formdata = new FormData;
+      fileInput = document.getElementById('csvFile');
+      i = 0;
+      while (i < fileInput.files.length) {
+        formdata.append('csvFile', fileInput.files[0], fileInput.files[0].name);
+        i++;
+      }
+      xhr = new XMLHttpRequest;
+      xhr.open('POST', action);
+      xhr.send(formdata);
+      return xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 202) {
+            toaster.success({
+              title: "Import SIMs",
+              body: "Import SIMs Successfully"
+            });
+          } else {
+            toaster.error({
+              title: "Import SIMs",
+              body: "Error Importing SIMs"
+            });
+          }
+        }
+      };
+    };
+  };
+  module.controller('importSimsController', importSimsController);
+})(angular.module('angle'));
+
+(function(module) {
   var manageAppsController;
   manageAppsController = function($scope, $rootScope, $stateParams, $state, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     $scope.fieldDesc = [
@@ -2748,46 +2788,6 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     };
   };
   module.controller('manageAppsController', manageAppsController);
-})(angular.module('angle'));
-
-(function(module) {
-  var importSimsController;
-  importSimsController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    $scope.data = {
-      Description: '',
-      Name: ''
-    };
-    $scope.importData = function() {
-      var action, fileInput, formdata, i, xhr;
-      action = mojioGlobal.apiUrl() + '/SimCards/InventoryAsync?desc=' + $scope.data.Description + '&name=' + $scope.data.Name;
-      formdata = new FormData;
-      fileInput = document.getElementById('csvFile');
-      i = 0;
-      while (i < fileInput.files.length) {
-        formdata.append('csvFile', fileInput.files[0], fileInput.files[0].name);
-        i++;
-      }
-      xhr = new XMLHttpRequest;
-      xhr.open('POST', action);
-      xhr.send(formdata);
-      return xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 202) {
-            toaster.success({
-              title: "Import SIMs",
-              body: "Import SIMs Successfully"
-            });
-          } else {
-            toaster.error({
-              title: "Import SIMs",
-              body: "Error Importing SIMs"
-            });
-          }
-        }
-      };
-    };
-  };
-  module.controller('importSimsController', importSimsController);
 })(angular.module('angle'));
 
 (function(module) {
@@ -3479,18 +3479,18 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
 
 (function(module) {
   var simulatorController;
-  simulatorController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    var ChooseEventType, myOptions;
+  simulatorController = function($scope, $rootScope, $stateParams, mojioRemote, mojioLocal, mojioGlobal, toaster, $filter) {
+    var ChooseEventType, RandomEventTypes, myOptions, panoramaOptions, processSVData;
     $scope.Settings = {
       Duration: 2,
-      NoOfEvents: 90,
+      NoOfEvents: 30,
       RPM: {
-        Min: 0,
-        Max: 2000
+        Min: 300,
+        Max: 1200
       },
       Speed: {
-        Min: 0,
-        Max: 120
+        Min: 30,
+        Max: 90
       },
       Fuel: {
         Min: 70,
@@ -3513,19 +3513,115 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       EventsNo: 0,
       StepsNo: 0,
       LastImportantEvent: null,
-      LastEvent: null
+      LastEvent: null,
+      LastNetworkLatency: 0,
+      TotalNetworkLatency: 0,
+      AvgNetworkLatency: 0,
+      LastWaitBeforeSendingEvent: 0,
+      TotalWaitBeforeSendingEvent: 0
     };
     $scope.steps = null;
+    RandomEventTypes = [];
+    $scope.AllRandomEventTypes = {
+      "ConnectionLost": true,
+      "LowBattery": true,
+      "OffStatus": true,
+      "FenceEntered": true,
+      "FenceExited": true,
+      "Accident": true,
+      "HardBrake": true,
+      "HardAcceleration": true,
+      "Acceleration": true,
+      "Deceleration": true
+    };
     $scope.EventTypes = [
       {
-        value: "TripStatus",
-        text: 'Trip Status'
+        value: "MojioOn",
+        text: 'Mojio On'
+      }, {
+        value: "MojioOff",
+        text: 'Mojio Off'
+      }, {
+        value: "MojioIdle",
+        text: 'Mojio Idle'
+      }, {
+        value: "MojioWake",
+        text: 'Mojio Wake'
+      }, {
+        value: "ConnectionLost",
+        text: 'Connection Lost'
+      }, {
+        value: "LowBattery",
+        text: 'Low Battery'
+      }, {
+        value: "OffStatus",
+        text: 'Off Status'
       }, {
         value: "IgnitionOn",
         text: 'Ignition On'
       }, {
         value: "IgnitionOff",
         text: 'Ignition Off'
+      }, {
+        value: "TripStatus",
+        text: 'Trip Status'
+      }, {
+        value: "FenceEntered",
+        text: 'Fence Entered'
+      }, {
+        value: "FenceExited",
+        text: 'Fence Exited'
+      }, {
+        value: "MovementStart",
+        text: 'Movement Start'
+      }, {
+        value: "MovementStop",
+        text: 'Movement Stop'
+      }, {
+        value: "Park",
+        text: 'Park'
+      }, {
+        value: "Speed",
+        text: 'Excessive Speed'
+      }, {
+        value: "Accident",
+        text: 'Accident'
+      }, {
+        value: "HardBrake",
+        text: 'Hard Brake'
+      }, {
+        value: "HardRight",
+        text: 'Hard Right'
+      }, {
+        value: "HardLeft",
+        text: 'Hard Left'
+      }, {
+        value: "HardAcceleration",
+        text: 'Hard Acceleration'
+      }, {
+        value: "Accelerometer",
+        text: 'Accelerometer'
+      }, {
+        value: "Deceleration",
+        text: 'Deceleration'
+      }, {
+        value: "HeadingChange",
+        text: 'HeadingChange'
+      }, {
+        value: "Mileage",
+        text: 'Mileage'
+      }, {
+        value: "MILWarning",
+        text: 'MIL Warning'
+      }, {
+        value: "TowStart",
+        text: 'Tow Start'
+      }, {
+        value: "TowStop",
+        text: 'Tow Stop'
+      }, {
+        value: "Diagnostic",
+        text: 'Diagnostic'
       }
     ];
     $scope.EventTemplate = {
@@ -3583,6 +3679,13 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     $scope.map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
     $scope.directionsDisplay = new google.maps.DirectionsRenderer();
     $scope.directionsService = new google.maps.DirectionsService();
+    panoramaOptions = {
+      clickToGo: false,
+      disableDefaultUI: true
+    };
+    $scope.panorama = new google.maps.StreetViewPanorama(document.getElementById("pano"), panoramaOptions);
+    $scope.sv = new google.maps.StreetViewService();
+    $scope.map.setStreetView($scope.panorama);
     google.maps.event.addListener($scope.map, 'click', function(event) {
       var CurrentMarker;
       CurrentMarker = null;
@@ -3603,6 +3706,9 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         }
         $scope.Marker.End = $scope.createMarker(event.latLng, "End Point", "End Point", "red");
         CurrentMarker = $scope.Marker.End;
+        $scope.$apply(function() {
+          return $scope.PointType = "w";
+        });
       } else if ($scope.PointType === "w") {
         if ($scope.Marker.WayPoint.length < 8) {
           $scope.Marker.WayPoint.push($scope.createMarker(event.latLng, "Way Point", "Way Point", "#green"));
@@ -3614,6 +3720,11 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       });
       return $scope.ShowRoute();
     });
+    $scope.showVehicle = function() {
+      return $filter('filter')($scope.Vehicles, {
+        _id: $scope.SelectedVehicle
+      })[0].Name;
+    };
     $scope.ShowRoute = function() {
       var ipos, request, waypts;
       if (!$scope.Marker.Start || !$scope.Marker.End) {
@@ -3657,7 +3768,7 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       });
     };
     ChooseEventType = function(stepNo, pathNo, stepMax, pathMax) {
-      var RandomEventTypes, eType;
+      var eType;
       eType = "TripStatus";
       if (stepNo === 0 && pathNo === 0) {
         eType = "MovementStart";
@@ -3668,13 +3779,18 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
       } else if (Math.random() * 100 > $scope.Settings.NoOfEvents) {
         eType = "";
       } else if (Math.random() * 100 <= $scope.Settings.SpecialEventChance) {
-        RandomEventTypes = ["ConnectionLost", "LowBattery", "OffStatus", "FenceEntered", "FenceExited", "Accident", "HardBrake", "HardAcceleration", "Acceleration", "Deceleration"];
         eType = RandomEventTypes[Math.floor(Math.random() * RandomEventTypes.length)];
       }
       return eType;
     };
     $scope.CreateEvents = function() {
-      var CurrentEventNo, TotalEventsNo, distanceSoFar, imax, ipos, jmax, jpos, newEvent, thisStepDistance;
+      var CurrentEventNo, TotalEventsNo, distanceSoFar, ev, imax, ipos, jmax, jpos, newEvent, p0, p1, thisStepDistance;
+      RandomEventTypes = [];
+      for (ev in $scope.AllRandomEventTypes) {
+        if ($scope.AllRandomEventTypes[ev]) {
+          RandomEventTypes.push(ev);
+        }
+      }
       $scope.Events = [];
       TotalEventsNo = 0;
       ipos = 0;
@@ -3712,6 +3828,17 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           newEvent.Speed = Math.floor($scope.Settings.Speed.Min + ($scope.Settings.Speed.Max - $scope.Settings.Speed.Min) * Math.random());
           newEvent.FuelLevel = Math.round(10 * ($scope.Settings.Fuel.Max - ($scope.Settings.Fuel.Max - $scope.Settings.Fuel.Min) * CurrentEventNo / TotalEventsNo)) / 10;
           newEvent.Odometer = distanceSoFar + Math.round(thisStepDistance * (jpos + 1) / jmax);
+          if (ipos === imax - 1 && jpos === jmax - 1) {
+            newEvent.Heading = $scope.Events[$scope.Events.length - 1].Heaging;
+          } else {
+            p0 = new google.maps.LatLng(newEvent.Location.Lat, newEvent.Location.Lng);
+            if (jpos !== jmax - 1) {
+              p1 = new google.maps.LatLng($scope.steps[ipos].path[jpos + 1].lat(), $scope.steps[ipos].path[jpos + 1].lng());
+            } else {
+              p1 = new google.maps.LatLng($scope.steps[ipos + 1].path[0].lat(), $scope.steps[ipos + 1].path[0].lng());
+            }
+            newEvent.Heading = google.maps.geometry.spherical.computeHeading(p0, p1);
+          }
           $scope.Events.push(newEvent);
           jpos++;
           CurrentEventNo++;
@@ -3771,6 +3898,21 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
     $scope.SimulationStop = function() {
       $scope.SimulationMode = "Stop";
       $scope.SimulationStep = 0;
+      $scope.Info.LastNetworkLatency = 0;
+      $scope.Info.TotalNetworkLatency = 0;
+      $scope.Info.AvgNetworkLatency = 0;
+      $scope.Info.LastWaitBeforeSendingEvent = 0;
+      $scope.Info.TotalWaitBeforeSendingEvent = 0;
+    };
+    processSVData = function(data, status) {
+      if (status === google.maps.StreetViewStatus.OK) {
+        $scope.panorama.setPano(data.location.pano);
+        $scope.panorama.setPov({
+          heading: $scope.heading,
+          pitch: 0
+        });
+        return $scope.panorama.setVisible(true);
+      }
     };
     $scope.SimulationNextStep = function() {
       var cEvent, date1, sEvent;
@@ -3790,6 +3932,8 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         $scope.Marker.Current = null;
       }
       $scope.Marker.Current = $scope.createMarker(new google.maps.LatLng(cEvent.Location.Lat, cEvent.Location.Lng), "Current", "Current", "white");
+      $scope.heading = cEvent.Heading;
+      $scope.sv.getPanoramaByLocation(new google.maps.LatLng(cEvent.Location.Lat, cEvent.Location.Lng), 50, processSVData);
       date1 = new Date();
       sEvent = angular.copy(cEvent);
       delete sEvent._viewStatus;
@@ -3797,12 +3941,18 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
         var date2, tspan;
         date2 = new Date();
         tspan = date2 - date1;
+        $scope.Info.LastNetworkLatency = tspan;
+        $scope.Info.TotalNetworkLatency += tspan;
+        $scope.Info.AvgNetworkLatency = Math.round($scope.Info.TotalNetworkLatency / ($scope.SimulationStep + 1));
         return $scope.SimulationPrepareNextStep(tspan);
       }, function() {
         var date2, tspan;
         date2 = new Date();
         tspan = date2 - date1;
-        $scope.SimulationPrepareNextStep(tspan);
+        $scope.Info.LastNetworkLatency = tspan;
+        $scope.Info.TotalNetworkLatency += tspan;
+        $scope.Info.AvgNetworkLatency = Math.round($scope.Info.TotalNetworkLatency / ($scope.SimulationStep + 1));
+        $scope.SimulationPrepareNextStep(Math.max($scope.Info.LastNetworkLatency, $scope.Info.AvgNetworkLatency));
         return $scope.SimulationPrepareNextStep();
       });
     };
@@ -3818,11 +3968,13 @@ App.service('Utils', ["$window", "APP_MEDIAQUERY", function($window, APP_MEDIAQU
           $scope.SimulationStop();
         }
       } else if ($scope.SimulationMode === "Play") {
-        delay = $scope.Settings.Duration * 60 * 1000 / $scope.Events.length;
+        delay = Math.round($scope.Settings.Duration * 60 * 1000 / $scope.Events.length);
         delay = delay - tspan;
         if (delay < 1) {
           delay = 1;
         }
+        $scope.Info.LastWaitBeforeSendingEvent = delay;
+        $scope.Info.TotalWaitBeforeSendingEvent += delay;
         return $scope.SimulationTimer = window.setTimeout($scope.SimulationNextStep, delay);
       }
     };
@@ -3968,7 +4120,7 @@ angular.module('angle').filter('timeago', function() {
         $scope.NodeClick = function(node) {
           var page;
           $scope.ViewMode = "html";
-          $scope.page = [];
+          $scope.pages = [];
           page = {
             Title: $scope.FileTitle(node),
             GitHubUrl: $scope.data.github.Data + node.path + "/" + node.name,
@@ -4921,6 +5073,29 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
+  var eventGrid;
+  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/event_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('eventGrid', [eventGrid]);
+})(angular.module('angle'));
+
+(function(module) {
   var deviceGrid;
   deviceGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -4942,29 +5117,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('deviceGrid', [deviceGrid]);
-})(angular.module('angle'));
-
-(function(module) {
-  var eventGrid;
-  eventGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/event_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('eventGrid', [eventGrid]);
 })(angular.module('angle'));
 
 (function(module) {
@@ -4991,6 +5143,30 @@ angular.module('angle').filter('timeago', function() {
 })(angular.module('angle'));
 
 (function(module) {
+  var tripGrid;
+  tripGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
+    return {
+      restrict: 'EA',
+      templateUrl: 'app/views/trip_grid.html',
+      scope: {
+        adminMode: '=',
+        settings: '=',
+        rowDetail: '=',
+        footer: '=',
+        api: '=',
+        broadcast: '=',
+        linkToDetail: '=',
+        subEvent: '=',
+        subSubsGrid: '='
+      },
+      controller: 'mojioGridController',
+      link: function(scope, element, attrs) {}
+    };
+  };
+  return module.directive('tripGrid', [tripGrid]);
+})(angular.module('angle'));
+
+(function(module) {
   var userGrid;
   userGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
     return {
@@ -5013,30 +5189,6 @@ angular.module('angle').filter('timeago', function() {
     };
   };
   return module.directive('userGrid', [userGrid]);
-})(angular.module('angle'));
-
-(function(module) {
-  var tripGrid;
-  tripGrid = function($rootScope, $window, mojioRemote, mojioLocal, mojioGlobal, toaster) {
-    return {
-      restrict: 'EA',
-      templateUrl: 'app/views/trip_grid.html',
-      scope: {
-        adminMode: '=',
-        settings: '=',
-        rowDetail: '=',
-        footer: '=',
-        api: '=',
-        broadcast: '=',
-        linkToDetail: '=',
-        subEvent: '=',
-        subSubsGrid: '='
-      },
-      controller: 'mojioGridController',
-      link: function(scope, element, attrs) {}
-    };
-  };
-  return module.directive('tripGrid', [tripGrid]);
 })(angular.module('angle'));
 
 (function(module) {
