@@ -2,9 +2,12 @@
    <div class="row">
       <div class="col-md-8">
          <div class="panel panel-default">
-            <div class="panel-body">
+            <div class="panel-heading">
+               <h4 class="panel-title">Map</h4>
+            </div>
+            <div style="height:265px" class="panel-body">
                <div class="row">
-                  <div ng-class="{'col-md-8':SimulationMode=='Stop','col-md-8':SimulationMode!='Stop'}">
+                  <div ng-class="{'col-md-12':SimulationMode=='Stop','col-md-8':SimulationMode!='Stop'}">
                      <div id="map_canvas" style="height:248px"></div>
                   </div>
                   <div ng-show="SimulationMode!='Stop'" class="col-md-4">
@@ -24,6 +27,14 @@
                      <button ng-click="PointType='e'" type="button" ng-class="{'btn-success':PointType=='e','btn-default':PointType!='e'}" class="mb-sm btn btn-labeled">
                         <span class="btn-label"><i class="fa fa-street-view"></i>
                         </span>&nbsp;End</button>
+                     <button ng-click="ClearPoints()" type="button" class="mb-sm btn btn-labeled btn-default">
+                        <span class="btn-label"><i class="fa fa-times"></i>
+                        </span>&nbsp;Remove All Points</button>
+                     <div class="pull-right">
+                        <button ng-click="CircularTrip()" type="button" class="mb-sm btn btn-labeled btn-default">
+                           <span class="btn-label"><i ng-class="{'fa-check-square-o':Settings.CircularTrip,'fa-square-o':!Settings.CircularTrip}" class="fa"></i>
+                           </span>&nbsp;Return To Start Point</button>
+                     </div>
                   </div>
                </div>
                <div ng-if="steps!=null">
@@ -153,13 +164,13 @@
          </div>
       </div>
       <div class="col-md-4">
-         <div ng-if="Events!=null" class="panel panel-default">
+         <div class="panel panel-default">
             <div class="panel-heading">
                <h4 class="panel-title">Events</h4>
             </div>
-            <div style="height:270px;overflow-y:scroll" class="panel-body">
+            <div style="height:265px;overflow-y:scroll" class="panel-body">
                <ul class="fa-ul">
-                  <li ng-repeat="ev in Events"><i ng-click="ChangeViewStatus(ev)" ng-class="{'fa-caret-right':ev._viewStatus=='c','fa-caret-down':ev._viewStatus=='e'}" class="fa fa-li"></i>{{$index}}:<a editable-select="ev.EventType" buttons="no" e-ng-options="s.value as s.text for s in EventTypes">{{ev.EventType}}</a>
+                  <li ng-repeat="ev in Settings.Events"><i ng-click="ChangeViewStatus(ev)" ng-class="{'fa-caret-right':ev._viewStatus=='c','fa-caret-down':ev._viewStatus=='e'}" class="fa fa-li"></i>{{$index}}:<a editable-select="ev.EventType" buttons="no" e-ng-options="s.value as s.text for s in EventTypes">{{ev.EventType}}</a>
                      <ul
                      ng-if="ev._viewStatus=='e'">
                         <li ng-repeat="(key,fl) in ev" ng-if="showEventField(key) || key=='Location'">{{key}}:&nbsp;<a ng-if="showEventField(key)" editable-text="fl" buttons="no">{{(fl==="" || fl===null)?"null":fl}}</a>
@@ -170,12 +181,27 @@
                </ul>
             </div>
             <div class="panel-footer">
-               <button ng-if="SimulationMode!='Play'" ng-click="SimulationPlay()" type="button" class="mb-sm btn btn-success"><i class="fa fa-play"></i>
+               <button ng-disabled="Settings.Events==null" ng-if="SimulationMode!='Play'" ng-click="SimulationPlay()" type="button" class="mb-sm btn btn-success"><i class="fa fa-play"></i>
                </button>
-               <button ng-if="SimulationMode=='Play'" ng-click="SimulationPause()" type="button" class="mb-sm btn btn-info"><i class="fa fa-pause"></i>
+               <button ng-disabled="Settings.Events==null" ng-if="SimulationMode=='Play'" ng-click="SimulationPause()" type="button" class="mb-sm btn btn-info"><i class="fa fa-pause"></i>
                </button>
-               <button ng-if="SimulationMode!='Stop'" ng-click="SimulationStop()" type="button" class="mb-sm btn btn-danger"><i class="fa fa-stop"></i>
+               <button ng-disabled="Settings.Events==null" ng-if="SimulationMode!='Stop'" ng-click="SimulationStop()" type="button" class="mb-sm btn btn-danger"><i class="fa fa-stop"></i>
                </button>
+               <span class="pull-right">
+                  <input ng-if="Settings.Events!=null" ng-model="Settings.Title" placeholder="Trip Title" style="width:125px;display:inline-block" class="form-control" />
+                  <button ng-if="Settings.Events!=null" ng-click="ClearEvents()" type="button" title="Clear" class="mb-sm btn btn-danger"><i class="fa fa-times"></i>
+                  </button>
+                  <button ng-if="Settings.Events!=null" ng-click="SaveSimulator()" type="button" title="Save" class="mb-sm btn btn-success"><i class="fa fa-upload"></i>
+                  </button>
+                  <div dropdown="dropdown" class="btn-group">
+                     <button type="button" dropdown-toggle="dropdown-toggle" ng-disabled="disabled" class="btn mb-sm btn-info dropdown-toggle"><i class="fa fa-download"></i>
+                     </button>
+                     <ul role="menu" class="dropdown-menu pull-right">
+                        <li ng-repeat="sst in SavedSimulatorTrip track by $index"><a ng-click="changeItemsPerPage(10)"><i are-you-sure="DeleteSimulator($index)" class="fa fa-times"></i><span ng-click="LoadSimulator(sst)">{{sst.Title}}</span></a>
+                        </li>
+                     </ul>
+                  </div>
+               </span>
             </div>
          </div>
          <div ng-if="steps!=null" class="panel panel-default">
@@ -187,7 +213,7 @@
                   <div class="col-md-12">Direction Steps: {{Info.StepsNo}}</div>
                </div>
                <div class="row">
-                  <div class="col-md-12">Current Step: {{SimulationStep}} / {{Events.length}}</div>
+                  <div class="col-md-12">Current Step: {{SimulationStep}} / {{Settings.Events.length}}</div>
                </div>
                <div class="row">
                   <div class="col-md-12">
